@@ -1,14 +1,46 @@
+## Copyright (C) 2010 Ratnadeep Debnath <rtnpro@fedoraproject.org>
+
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 import pygtk
 import gtk
 import sqlite3
 import os
 
+def db_init():
+    if not os.path.exists('./wordz'):
+        conn = sqlite3.connect('./wordz')
+        c = conn.cursor()
+        c.execute('''create table word_groups
+        (word text, grp text)''')
+        c.execute('''create table groups
+        (grp text)''')
+        c.execute('''insert into word_groups
+        values('dummy', 'dummy')''')
+        c.execute('''insert into groups
+        values('dummy')''')
+        conn.commit()
+        c.close()
+
 def list_groups():
     conn = sqlite3.connect('./wordz')
     c = conn.cursor()
     groups = []
-    for row in c.execute('select grp from groups order by grp'):
-        groups.append(row[0])
+    for row in c.execute("""select grp from groups order by grp"""):
+        if row[0] is not 'dummy':
+            groups.append(row[0])
     return groups
 
 def list_words_per_group(grp):
@@ -17,9 +49,8 @@ def list_words_per_group(grp):
     words = []
     t = (grp,)
     for row in c.execute("""select word from word_groups where grp=?""",t):
-        if row[0] != '':
+        if row[0] != '' or row[0]!='dummy':
             words.append(row[0])
-            print row
     return words
 
 
@@ -39,6 +70,44 @@ def add_to_db(word, grp):
 
 
 class wordzGui:
+    def __init__(self):
+        self.builder = gtk.Builder()
+        self.builder.add_from_file("wordz.glade")
+        self.window = self.builder.get_object("MainWindow")
+        self.window.set_icon_from_file("./icons/letter_tiles1.png")
+        self.builder.connect_signals(self)
+        self.get_word = self.builder.get_object("get_word")
+        self.get_group = gtk.combo_box_entry_new_text()
+        self.get_group.child.connect('key-press-event', self.item_list_changed)
+        for x in list_groups():
+            self.get_group.append_text(x)
+        self.table1 = self.builder.get_object("table1")
+        self.get_group.show()
+        self.table1.attach(self.get_group, 1,2,1,2)
+
+        self.treestore = gtk.TreeStore(str)
+        for group in list_groups():
+            piter = self.treestore.append(None, [group])
+            for word in list_words_per_group(group):
+                self.treestore.append(piter, [word])
+        self.treeview = gtk.TreeView(self.treestore)
+        self.tvcolumn = gtk.TreeViewColumn('Word Groups')
+        self.treeview.append_column(self.tvcolumn)
+        self.cell = gtk.CellRendererText()
+        self.tvcolumn.pack_start(self.cell, True)
+        self.tvcolumn.add_attribute(self.cell, 'text', 0)
+        self.treeview.set_search_column(0)
+        self.tvcolumn.set_sort_column_id(0)
+        self.treeview.set_reorderable(True)
+        self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
+        self.scrolledwindow1.add_with_viewport(self.treeview)
+
+    def item_list_changed(self, widget=None, event=None):
+        key = gtk.gdk.keyval_name(event.keyval)
+        if key == "Return":
+            self.get_group.append_text(widget.get_text())
+            widget.set_text("")
+
     def on_window_destroy(self, widget, data=None):
         gtk.main_quit()
 
@@ -49,6 +118,12 @@ class wordzGui:
         #print group
         add_to_db(word, group)
         self.refresh_groups(group)
+        self.treestore.clear()
+        for group in list_groups():
+            piter = self.treestore.append(None, [group])
+            for word in list_words_per_group(group):
+                self.treestore.append(piter, [word])
+
     def item_list_changed(self, widget=None, event=None):
         key = gtk.gdk.keyval_name(event.keyval)
         if key == "Return":
@@ -88,48 +163,8 @@ class wordzGui:
                 self.treestore.append(piter, [word])
 
 
-
-
-    def __init__(self):
-        self.builder = gtk.Builder()
-        self.builder.add_from_file("wordz.glade")
-        self.window = self.builder.get_object("MainWindow")
-        self.builder.connect_signals(self)
-        self.get_word = self.builder.get_object("get_word")
-        #self.get_group = self.builder.get_object("get_group")
-        self.get_group = gtk.combo_box_entry_new_text()
-        self.get_group.child.connect('key-press-event', self.item_list_changed)
-        for x in list_groups():
-            self.get_group.append_text(x)
-        self.table1 = self.builder.get_object("table1")
-        self.get_group.show()
-        self.table1.attach(self.get_group, 1,2,1,2)
-
-#treeView
-        self.treestore = gtk.TreeStore(str)
-        for group in list_groups():
-            piter = self.treestore.append(None, [group])
-            for word in list_words_per_group(group):
-                self.treestore.append(piter, [word])
-        self.treeview = gtk.TreeView(self.treestore)
-        self.tvcolumn = gtk.TreeViewColumn('Word Groups')
-        self.treeview.append_column(self.tvcolumn)
-        self.cell = gtk.CellRendererText()
-        self.tvcolumn.pack_start(self.cell, True)
-        self.tvcolumn.add_attribute(self.cell, 'text', 0)
-        self.treeview.set_search_column(0)
-        self.tvcolumn.set_sort_column_id(0)
-        self.treeview.set_reorderable(True)
-        self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
-        self.scrolledwindow1.add_with_viewport(self.treeview)
-
-    def item_list_changed(self, widget=None, event=None):
-        key = gtk.gdk.keyval_name(event.keyval)
-        if key == "Return":
-            self.get_group.append_text(widget.get_text())
-            widget.set_text("")
-
 if __name__ == "__main__":
+    db_init()
     win = wordzGui()
     win.window.show_all()
     gtk.main()

@@ -86,6 +86,7 @@
                         <property name="visible">True</property>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
@@ -208,6 +209,7 @@
                 <property name="visible">True</property>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
