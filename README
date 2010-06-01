@@ -1,0 +1,11 @@
+CREDITS:
+The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205
+It has been designed by mazeo.
+
+INSTALL:
+As root, do 'python setup.py install'
+
+DEPENDENCIES:
+python DB-API 2.0 interface for SQLite 3.x
+python-sqlite2 in fedora
+As root, do 'yum install python-sqlite2'

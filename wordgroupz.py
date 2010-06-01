@@ -19,43 +19,57 @@ import gtk
 import sqlite3
 import os
 
+usr_home = os.environ['HOME']
+wordgroupz_dir = usr_home+'/.wordgroupz'
+db_file_path = wordgroupz_dir+'/wordz'
+
 def db_init():
-    if not os.path.exists('./wordz'):
-        conn = sqlite3.connect('./wordz')
-        c = conn.cursor()
+    if not os.path.exists(wordgroupz_dir):
+        os.mkdir(wordgroupz_dir, 0755)
+    #if not os.path.exists(db_file_path):
+    conn = sqlite3.connect(db_file_path)
+    c =  conn.cursor()
+    tables = []
+    for x in c.execute('''select name from sqlite_master'''):
+        tables.append(x[0])
+    if not 'word_groups' in tables:
         c.execute('''create table word_groups
         (word text, grp text)''')
+        #c.execute('''insert into word_groups
+        #values('dummy', 'dummy')''')
+    if not 'groups' in tables:
         c.execute('''create table groups
         (grp text)''')
-        c.execute('''insert into word_groups
-        values('dummy', 'dummy')''')
-        c.execute('''insert into groups
-        values('dummy')''')
-        conn.commit()
-        c.close()
+        #c.execute('''insert into groups
+        #values('dummy')''')
+    conn.commit()
+    c.close()
+    conn.close()
 
 def list_groups():
-    conn = sqlite3.connect('./wordz')
+    conn = sqlite3.connect(db_file_path)
     c = conn.cursor()
     groups = []
     for row in c.execute("""select grp from groups order by grp"""):
         if row[0] is not 'dummy':
             groups.append(row[0])
+    c.close()
     return groups
 
 def list_words_per_group(grp):
-    conn = sqlite3.connect('./wordz')
+    conn = sqlite3.connect(db_file_path)
     c = conn.cursor()
     words = []
     t = (grp,)
     for row in c.execute("""select word from word_groups where grp=?""",t):
-        if row[0] != '' or row[0]!='dummy':
+        if row[0] != '' and row[0]!='dummy':
             words.append(row[0])
+    c.close()
     return words
 
 
 def add_to_db(word, grp):
-    conn = sqlite3.connect('./wordz')
+    conn = sqlite3.connect(db_file_path)
     c = conn.cursor()
     t = (grp,)
     if grp not in list_groups():
@@ -72,9 +86,10 @@ def add_to_db(word, grp):
 class wordzGui:
     def __init__(self):
         self.builder = gtk.Builder()
-        self.builder.add_from_file("wordz.glade")
+        self.builder.add_from_file("wordgroupz.glade")
         self.window = self.builder.get_object("MainWindow")
-        self.window.set_icon_from_file("./icons/letter_tiles1.png")
+        self.window.set_icon_from_file("./icons/wordgroupz.png")
+        self.window.set_title("wordGroupz")
         self.builder.connect_signals(self)
         self.get_word = self.builder.get_object("get_word")
         self.get_group = gtk.combo_box_entry_new_text()
@@ -137,9 +152,9 @@ class wordzGui:
         dialog = gtk.AboutDialog()
         dialog.set_name('wordz')
         dialog.set_copyright('(c) 2010 Ratnadeep Debnath')
-        dialog.set_website('http://gitorious.org/wordz/wordz')
+        dialog.set_website('http://gitorious.org/wordGroupz/wordgroupz')
         dialog.set_authors(['Ratnadeep Debnath <rtnpro@gmail.com>'])
-        dialog.set_program_name('wordz')
+        dialog.set_program_name('wordGroupz')
         dialog.run()
         dialog.destroy()
 
