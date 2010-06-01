@@ -26,7 +26,6 @@ db_file_path = wordgroupz_dir+'/wordz'
 def db_init():
     if not os.path.exists(wordgroupz_dir):
         os.mkdir(wordgroupz_dir, 0755)
-    #if not os.path.exists(db_file_path):
     conn = sqlite3.connect(db_file_path)
     c =  conn.cursor()
     tables = []
@@ -35,13 +34,9 @@ def db_init():
     if not 'word_groups' in tables:
         c.execute('''create table word_groups
         (word text, grp text)''')
-        #c.execute('''insert into word_groups
-        #values('dummy', 'dummy')''')
     if not 'groups' in tables:
         c.execute('''create table groups
         (grp text)''')
-        #c.execute('''insert into groups
-        #values('dummy')''')
     conn.commit()
     c.close()
     conn.close()
@@ -62,7 +57,7 @@ def list_words_per_group(grp):
     words = []
     t = (grp,)
     for row in c.execute("""select word from word_groups where grp=?""",t):
-        if row[0] != '' and row[0]!='dummy':
+        if row[0] != '':
             words.append(row[0])
     c.close()
     return words
