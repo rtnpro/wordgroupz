@@ -88,7 +88,7 @@ class wordzGui:
         self.builder = gtk.Builder()
         self.builder.add_from_file("wordgroupz.glade")
         self.window = self.builder.get_object("MainWindow")
-        self.window.set_icon_from_file("./icons/wordgroupz.png")
+        self.window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
         self.window.set_title("wordGroupz")
         self.builder.connect_signals(self)
         self.get_word = self.builder.get_object("get_word")

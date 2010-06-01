@@ -1,4 +1,4 @@
 #!/bin/sh
 export PYTHONPATH=/usr/share/wordgroupz
 cd /usr/share/wordgroupz
-exec /usr/bin/python -tt /usr/share/wordgroupz
+exec /usr/bin/python -tt /usr/share/wordgroupz/wordgroupz.py
