@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=wordgroupz
+GenericName=A vocabulary building application
+Comment=A vocabulary building application
+Icon=wordgroupz
+TryExec=wordgroupz
+Exec=wordgroupz
+Terminal=false
+Categories=Application;Education;
