@@ -68,10 +68,10 @@ def add_to_db(word, grp):
     conn = sqlite3.connect(db_file_path)
     c = conn.cursor()
     t = (grp,)
-    if grp not in list_groups():
+    if grp not in list_groups() and grp is not '':
         c.execute("""insert into groups values (?)""",t)
         conn.commit()
-    if word is not '' and word not in list_words_per_group(grp):
+    if word is not '' and word not in list_words_per_group(grp) and grp is not '':
         t = (word, grp)
         c.execute('''insert into word_groups
             values(?,?)''', t)
