@@ -46,9 +46,10 @@ def list_groups():
     c = conn.cursor()
     groups = []
     for row in c.execute("""select grp from groups order by grp"""):
-        if row[0] is not 'dummy':
+        if row[0] is not u'':
             groups.append(row[0])
     c.close()
+    print groups
     return groups
 
 def list_words_per_group(grp):
@@ -70,7 +71,7 @@ def add_to_db(word, grp):
     if grp not in list_groups():
         c.execute("""insert into groups values (?)""",t)
         conn.commit()
-    if word is not '':
+    if word is not '' and word not in list_words_per_group(grp):
         t = (word, grp)
         c.execute('''insert into word_groups
             values(?,?)''', t)
