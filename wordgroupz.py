@@ -33,7 +33,7 @@ def db_init():
         tables.append(x[0])
     if not 'word_groups' in tables:
         c.execute('''create table word_groups
-        (word text, grp text)''')
+        (word text, grp text, details text)''')
     if not 'groups' in tables:
         c.execute('''create table groups
         (grp text)''')
@@ -64,19 +64,33 @@ def list_words_per_group(grp):
     return words
 
 
-def add_to_db(word, grp):
+def add_to_db(word, grp, detail):
     conn = sqlite3.connect(db_file_path)
     c = conn.cursor()
+    conn.text_factory = str
     t = (grp,)
     if grp not in list_groups() and grp is not '':
         c.execute("""insert into groups values (?)""",t)
         conn.commit()
     if word is not '' and word not in list_words_per_group(grp) and grp is not '':
-        t = (word, grp)
+        t = (word, grp, detail)
         c.execute('''insert into word_groups
-            values(?,?)''', t)
+            values(?,?,?)''', t)
         conn.commit()
     c.close()
+
+def get_details(selection):
+    conn = sqlite3.connect(db_file_path)
+    c = conn.cursor()
+    t = (selection, )
+    print selection
+    if selection in list_groups() or selection is '':
+        return "No word selected"
+    else:
+        result = c.execute("""select word,grp,details from word_groups where word=?""",t)
+        tmp = result.fetchone()
+        print tmp
+        return tmp[2]
 
 
 class wordzGui:
@@ -89,7 +103,10 @@ class wordzGui:
         self.builder.connect_signals(self)
         self.get_word = self.builder.get_object("get_word")
         self.get_group = gtk.combo_box_entry_new_text()
-        self.get_group.child.connect('key-press-event', self.item_list_changed)
+        self.details = self.builder.get_object("textview1")
+        self.get_group.child.connect('key-press-event',self.item_list_changed)
+        self.vpan = self.builder.get_object("vpaned1")
+        self.output_txtview = self.builder.get_object("textview2")
         for x in list_groups():
             self.get_group.append_text(x)
         self.table1 = self.builder.get_object("table1")
@@ -110,8 +127,26 @@ class wordzGui:
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(True)
+        self.selection = self.treeview.get_selection()
+        #self.selection.set_select_function(self.on_tree_select, data=None)
+        self.selection.connect('changed', self.tree_select_changed)
         self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
         self.scrolledwindow1.add_with_viewport(self.treeview)
+
+    def tree_select_changed(self, widget=None, event=None):
+        model, iter = self.selection.get_selected()
+        value = model.get_value(iter,0)
+        #print value
+        if value not in list_groups():
+            self.vpan.set_position(275)
+        else:
+            self.vpan.set_position(10000)
+        detail = get_details(value)
+        buff = self.output_txtview.get_buffer()
+        buff.set_text(detail)
+        self.output_txtview.set_buffer(buff)
+
+
 
     def item_list_changed(self, widget=None, event=None):
         key = gtk.gdk.keyval_name(event.keyval)
@@ -126,8 +161,12 @@ class wordzGui:
         word = self.get_word.get_text()
         get_group_ch = self.get_group.child
         group = get_group_ch.get_text()
+        conts = self.details.get_buffer()
+        start = conts.get_iter_at_offset(0)
+        end = conts.get_iter_at_offset(-1)
+        detail = conts.get_text(start, end)
         #print group
-        add_to_db(word, group)
+        add_to_db(word, group, detail)
         self.refresh_groups(group)
         self.treestore.clear()
         for group in list_groups():
