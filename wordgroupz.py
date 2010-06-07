@@ -133,7 +133,7 @@ class wordzGui:
         self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
         self.scrolledwindow1.add_with_viewport(self.treeview)
         self.search=self.builder.get_object("search")
-    	self.search.connect('changed',self.on_search_changed)
+        self.search.connect('changed',self.on_search_changed)
 
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
