@@ -132,6 +132,19 @@ class wordzGui:
         self.selection.connect('changed', self.tree_select_changed)
         self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
         self.scrolledwindow1.add_with_viewport(self.treeview)
+        self.search=self.builder.get_object("search")
+    	self.search.connect('changed',self.on_search_changed)
+
+    def on_search_changed(self,widget=None,event=None):
+        search_txt = self.search.get_text()
+        groups = list_groups()
+        words = list
+        self.treestore.clear()
+        for group in groups:
+            if search_txt in list_words_per_group(group):
+                piter = self.treestore.append(None, [group])
+                for word in list_words_per_group(group):
+                    self.treestore.append(piter, [word])
 
     def tree_select_changed(self, widget=None, event=None):
         model, iter = self.selection.get_selected()
