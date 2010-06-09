@@ -151,7 +151,12 @@ class wordzGui:
         value = model.get_value(iter,0)
         #print value
         if value not in list_groups():
-            self.vpan.set_position(275)
+            tmp = 0
+            w, h = self.window.get_size()
+            self.vpan.set_position(h)
+            tmp = self.vpan.get_position()
+            print tmp
+            self.vpan.set_position(int((275.0/450)*h))
         else:
             self.vpan.set_position(10000)
         detail = get_details(value)
@@ -194,7 +199,14 @@ class wordzGui:
             widget.set_text('')
 
     def refresh_groups(self, grp):
-        self.get_group.append_text(grp)
+        tmp = list_groups()
+        n = len(tmp)
+        print n
+        print self.get_group.get_text_column()
+        for i in range(0,n):
+            self.get_group.remove_text(0)
+        for x in tmp:
+            self.get_group.append_text(x)
 
     def on_about_clicked(self, widget, data=None):
         dialog = gtk.AboutDialog()
