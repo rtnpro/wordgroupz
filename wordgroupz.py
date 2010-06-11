@@ -92,6 +92,13 @@ def get_details(selection):
         print tmp
         return tmp[2]
 
+def update_details(details):
+    conn = sqlite3.connect(db_file_path)
+    c = conn.cursor()
+    t = (win.tree_value,)
+    c.execute("""update word_groups set details='%s' where word=?"""%(details),t)
+    conn.commit()
+    c.close()
 
 class wordzGui:
     def __init__(self):
@@ -113,6 +120,12 @@ class wordzGui:
         self.get_group.show()
         self.table1.attach(self.get_group, 1,2,1,2)
 
+        #self.edit = self.builder.get_object("edit")
+        #self.save = self.builder.get_object("save")
+        self.hbox3 = self.builder.get_object("hbox3")
+        #self.edit.hide()
+        #self.save.hide()
+        self.hbox3.hide()
         self.treestore = gtk.TreeStore(str)
         for group in list_groups():
             piter = self.treestore.append(None, [group])
@@ -130,6 +143,7 @@ class wordzGui:
         self.selection = self.treeview.get_selection()
         #self.selection.set_select_function(self.on_tree_select, data=None)
         self.selection.connect('changed', self.tree_select_changed)
+        self.treeview.show()
         self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
         self.scrolledwindow1.add_with_viewport(self.treeview)
         self.search=self.builder.get_object("search")
@@ -148,23 +162,37 @@ class wordzGui:
 
     def tree_select_changed(self, widget=None, event=None):
         model, iter = self.selection.get_selected()
-        value = model.get_value(iter,0)
+        self.tree_value = model.get_value(iter,0)
         #print value
-        if value not in list_groups():
+        if self.tree_value not in list_groups():
             tmp = 0
+            self.hbox3.show()
             w, h = self.window.get_size()
             self.vpan.set_position(h)
             tmp = self.vpan.get_position()
             print tmp
-            self.vpan.set_position(int((275.0/450)*h))
+            self.vpan.set_position(int((255.0/450)*h))
         else:
             self.vpan.set_position(10000)
-        detail = get_details(value)
+            self.hbox3.hide()
+        if self.output_txtview.get_editable():
+            self.output_txtview.set_editable(False)
+        detail = get_details(self.tree_value)
         buff = self.output_txtview.get_buffer()
         buff.set_text(detail)
         self.output_txtview.set_buffer(buff)
 
 
+    def on_edit_clicked(self, widget=None, event=None):
+        self.output_txtview.set_editable(True)
+
+    def on_save_clicked(self, widget=None, event=None):
+        buff = self.output_txtview.get_buffer()
+        start = buff.get_iter_at_offset(0)
+        end = buff.get_iter_at_offset(-1)
+        new_details = buff.get_text(start, end)
+        update_details(new_details)
+        self.output_txtview.set_editable(False)
 
     def item_list_changed(self, widget=None, event=None):
         key = gtk.gdk.keyval_name(event.keyval)
@@ -241,5 +269,5 @@ class wordzGui:
 if __name__ == "__main__":
     db_init()
     win = wordzGui()
-    win.window.show_all()
+    win.window.show()
     gtk.main()
