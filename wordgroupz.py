@@ -110,6 +110,7 @@ class wordzGui:
         self.builder.connect_signals(self)
         self.get_word = self.builder.get_object("get_word")
         self.get_group = gtk.combo_box_entry_new_text()
+        self.get_group.set_tooltip_text("Enter a group for your word")
         self.details = self.builder.get_object("textview1")
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         self.vpan = self.builder.get_object("vpaned1")
@@ -143,6 +144,7 @@ class wordzGui:
         self.selection = self.treeview.get_selection()
         #self.selection.set_select_function(self.on_tree_select, data=None)
         self.selection.connect('changed', self.tree_select_changed)
+        self.treeview.set_tooltip_text("Shows words classified in groups")
         self.treeview.show()
         self.scrolledwindow1 = self.builder.get_object("scrolledwindow1")
         self.scrolledwindow1.add_with_viewport(self.treeview)
@@ -165,7 +167,6 @@ class wordzGui:
         self.tree_value = model.get_value(iter,0)
         #print value
         if self.tree_value not in list_groups():
-            tmp = 0
             self.hbox3.show()
             w, h = self.window.get_size()
             self.vpan.set_position(h)

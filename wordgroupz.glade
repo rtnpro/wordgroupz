@@ -54,6 +54,7 @@
                       <object class="GtkEntry" id="get_word">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Enter your word</property>
                         <property name="invisible_char">&#x25CF;</property>
                       </object>
                       <packing>
@@ -101,6 +102,7 @@
                               <object class="GtkTextView" id="textview1">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Enter details for your word</property>
                               </object>
                             </child>
                           </object>
@@ -149,6 +151,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Add word to database</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="on_add_clicked"/>
                       </object>
@@ -186,6 +189,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Go back to initial word tree</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="on_back_clicked"/>
                       </object>
@@ -199,6 +203,7 @@
                       <object class="GtkEntry" id="search">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Search for a word</property>
                         <property name="invisible_char">&#x25CF;</property>
                       </object>
                       <packing>
@@ -206,19 +211,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="find">
-                        <property name="label">gtk-find</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_find_clicked"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="padding">5</property>
-                        <property name="position">2</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -268,6 +261,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Edit details</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_edit_clicked"/>
                               </object>
@@ -282,6 +276,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Save changes to database</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_save_clicked"/>
                               </object>
@@ -311,6 +306,7 @@
                                   <object class="GtkTextView" id="textview2">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip_text" translatable="yes">"Shows details for selected word</property>
                                     <property name="editable">False</property>
                                   </object>
                                 </child>
@@ -361,6 +357,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">About wordGroupz</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_about_clicked"/>
               </object>
