@@ -5,7 +5,7 @@ from distutils.core import setup
 
 doclines = __doc__.split("\n")
 setup(name='wordgroupz',
-      version='0.1',
+      version='0.2',
       description=doclines[0],
       long_description = "\n".join(doclines[:]),
       platforms = ["Linux"],
