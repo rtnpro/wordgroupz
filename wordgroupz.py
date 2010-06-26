@@ -23,85 +23,83 @@ import os
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 db_file_path = wordgroupz_dir+'/wordz'
-
-def db_init():
-    if not os.path.exists(wordgroupz_dir):
-        os.mkdir(wordgroupz_dir, 0755)
-    conn = sqlite3.connect(db_file_path)
-    c =  conn.cursor()
-    tables = []
-    for x in c.execute('''select name from sqlite_master'''):
-        tables.append(x[0])
-    if not 'word_groups' in tables:
-        c.execute('''create table word_groups
-        (word text, grp text, details text)''')
-    if not 'groups' in tables:
-        c.execute('''create table groups
-        (grp text)''')
-    conn.commit()
-    c.close()
-    conn.close()
-
-def list_groups():
-    conn = sqlite3.connect(db_file_path)
-    c = conn.cursor()
-    groups = []
-    for row in c.execute("""select grp from groups order by grp"""):
-        if row[0] is not u'':
-            groups.append(row[0])
-    c.close()
-    print groups
-    return groups
-
-def list_words_per_group(grp):
-    conn = sqlite3.connect(db_file_path)
-    c = conn.cursor()
-    words = []
-    t = (grp,)
-    for row in c.execute("""select word from word_groups where grp=?""",t):
-        if row[0] != '':
-            words.append(row[0])
-    c.close()
-    return words
-
-
-def add_to_db(word, grp, detail):
-    conn = sqlite3.connect(db_file_path)
-    c = conn.cursor()
-    conn.text_factory = str
-    t = (grp,)
-    if grp not in list_groups() and grp is not '':
-        c.execute("""insert into groups values (?)""",t)
+class wordGroupzSql:    
+    def db_init(self):
+        if not os.path.exists(wordgroupz_dir):
+            os.mkdir(wordgroupz_dir, 0755)
+        conn = sqlite3.connect(db_file_path)
+        c =  conn.cursor()
+        tables = []
+        for x in c.execute('''select name from sqlite_master'''):
+            tables.append(x[0])
+        if not 'word_groups' in tables:
+            c.execute('''create table word_groups
+            (word text, grp text, details text)''')
+        #if not 'groups' in tables:
+         #   c.execute('''create table groups
+          #  (grp text)''')
         conn.commit()
-    if word is not '' and word not in list_words_per_group(grp) and grp is not '':
-        t = (word, grp, detail)
-        c.execute('''insert into word_groups
-            values(?,?,?)''', t)
+        c.close()
+        conn.close()
+
+    def list_groups(self):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        groups = []
+        for row in c.execute("""select grp from groups order by grp"""):
+            if row[0] is not u'':
+                groups.append(row[0])
+        c.close()
+        return groups
+    
+    def list_words_per_group(self,grp):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        words = []
+        t = (grp,)
+        for row in c.execute("""select word from word_groups where grp=?""",t):
+            if row[0] != '':
+                words.append(row[0])
+        c.close()
+        return words
+    
+
+    def add_to_db(self,word, grp, detail):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        conn.text_factory = str
+        t = (grp,)
+        if grp not in self.list_groups() and grp is not '':
+            c.execute("""insert into groups values (?)""",t)
+            conn.commit()
+        if word is not '' and word not in self.list_words_per_group(grp) and grp is not '':
+            t = (word, grp, detail)
+            c.execute('''insert into word_groups
+                values(?,?,?)''', t)
+            conn.commit()
+        c.close()
+    
+    def get_details(self,selection):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (selection, )
+        if selection in self.list_groups() or selection is '':
+            return "No word selected"
+        else:
+            result = c.execute("""select word,grp,details from word_groups where word=?""",t)
+            tmp = result.fetchone()
+            return tmp[2]
+
+    def update_details(self,details):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (win.tree_value,)
+        c.execute("""update word_groups set details='%s' where word=?"""% (details),t)
         conn.commit()
-    c.close()
-
-def get_details(selection):
-    conn = sqlite3.connect(db_file_path)
-    c = conn.cursor()
-    t = (selection, )
-    print selection
-    if selection in list_groups() or selection is '':
-        return "No word selected"
-    else:
-        result = c.execute("""select word,grp,details from word_groups where word=?""",t)
-        tmp = result.fetchone()
-        print tmp
-        return tmp[2]
-
-def update_details(details):
-    conn = sqlite3.connect(db_file_path)
-    c = conn.cursor()
-    t = (win.tree_value,)
-    c.execute("""update word_groups set details='%s' where word=?"""%(details),t)
-    conn.commit()
-    c.close()
-
+        c.close()
+    
 class wordzGui:
+    wordz_db=wordGroupzSql()
     def __init__(self):
         self.builder = gtk.Builder()
         self.builder.add_from_file("wordgroupz.glade")
@@ -116,22 +114,18 @@ class wordzGui:
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
-        for x in list_groups():
+        for x in wordz_db.list_groups():
             self.get_group.append_text(x)
         self.table1 = self.builder.get_object("table1")
         self.get_group.show()
         self.table1.attach(self.get_group, 1,2,1,2)
 
-        #self.edit = self.builder.get_object("edit")
-        #self.save = self.builder.get_object("save")
         self.hbox3 = self.builder.get_object("hbox3")
-        #self.edit.hide()
-        #self.save.hide()
         self.hbox3.hide()
         self.treestore = gtk.TreeStore(str)
-        for group in list_groups():
+        for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
-            for word in list_words_per_group(group):
+            for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
         self.treeview = gtk.TreeView(self.treestore)
         self.tvcolumn = gtk.TreeViewColumn('Word Groups')
@@ -143,7 +137,6 @@ class wordzGui:
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(True)
         self.selection = self.treeview.get_selection()
-        #self.selection.set_select_function(self.on_tree_select, data=None)
         self.selection.connect('changed', self.tree_select_changed)
         self.treeview.set_tooltip_text("Shows words classified in groups")
         self.treeview.show()
@@ -154,32 +147,30 @@ class wordzGui:
 
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
-        groups = list_groups()
         words = list
         self.treestore.clear()
-        for group in groups:
-            if search_txt in list_words_per_group(group):
+        for group in wordz_db.list_groups():
+            if search_txt in wordz_db.list_words_per_group(group):
                 piter = self.treestore.append(None, [group])
-                for word in list_words_per_group(group):
+                for word in wordz_db.list_words_per_group(group):
                     self.treestore.append(piter, [word])
 
     def tree_select_changed(self, widget=None, event=None):
         model, iter = self.selection.get_selected()
         self.tree_value = model.get_value(iter,0)
-        #print value
-        if self.tree_value not in list_groups():
+        
+        if self.tree_value not in wordz_db.list_groups():
             self.hbox3.show()
             w, h = self.window.get_size()
             self.vpan.set_position(h)
             tmp = self.vpan.get_position()
-            print tmp
             self.vpan.set_position(int((255.0/450)*h))
         else:
             self.vpan.set_position(10000)
             self.hbox3.hide()
         if self.output_txtview.get_editable():
             self.output_txtview.set_editable(False)
-        detail = get_details(self.tree_value)
+        detail = wordz_db.get_details(self.tree_value)
         buff = self.output_txtview.get_buffer()
         buff.set_text(detail)
         self.output_txtview.set_buffer(buff)
@@ -193,7 +184,7 @@ class wordzGui:
         start = buff.get_iter_at_offset(0)
         end = buff.get_iter_at_offset(-1)
         new_details = buff.get_text(start, end)
-        update_details(new_details)
+        wordz_db.update_details(new_details)
         self.output_txtview.set_editable(False)
 
     def item_list_changed(self, widget=None, event=None):
@@ -213,13 +204,12 @@ class wordzGui:
         start = conts.get_iter_at_offset(0)
         end = conts.get_iter_at_offset(-1)
         detail = conts.get_text(start, end)
-        #print group
-        add_to_db(word, group, detail)
+        wordz_db.add_to_db(word, group, detail)
         self.refresh_groups(group)
         self.treestore.clear()
-        for group in list_groups():
+        for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
-            for word in list_words_per_group(group):
+            for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
 
     def item_list_changed(self, widget=None, event=None):
@@ -229,10 +219,8 @@ class wordzGui:
             widget.set_text('')
 
     def refresh_groups(self, grp):
-        tmp = list_groups()
+        tmp = wordz_db.list_groups()
         n = len(tmp)
-        print n
-        print self.get_group.get_text_column()
         for i in range(0,n):
             self.get_group.remove_text(0)
         for x in tmp:
@@ -248,28 +236,18 @@ class wordzGui:
         dialog.run()
         dialog.destroy()
 
-    def on_find_clicked(self, widget, data=None):
-        search = self.builder.get_object("search")
-        search_txt = search.get_text()
-        groups = list_groups()
-        words = list
-        self.treestore.clear()
-        for group in groups:
-            if search_txt in list_words_per_group(group):
-                piter = self.treestore.append(None, [group])
-                for word in list_words_per_group(group):
-                    self.treestore.append(piter, [word])
-
+    
     def on_back_clicked(self, widget, data=None):
         self.treestore.clear()
-        for group in list_groups():
+        for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
-            for word in list_words_per_group(group):
+            for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
 
 
 if __name__ == "__main__":
-    db_init()
+    wordz_db=wordGroupzSql()
+    wordz_db.db_init()
     win = wordzGui()
     win.window.show()
     gtk.main()
