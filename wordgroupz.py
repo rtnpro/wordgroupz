@@ -23,7 +23,7 @@ import os
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 db_file_path = wordgroupz_dir+'/wordz'
-class wordGroupzSql:    
+class wordGroupzSql:
     def db_init(self):
         if not os.path.exists(wordgroupz_dir):
             os.mkdir(wordgroupz_dir, 0755)
@@ -51,7 +51,7 @@ class wordGroupzSql:
                 groups.append(row[0])
         c.close()
         return groups
-    
+
     def list_words_per_group(self,grp):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
@@ -62,7 +62,7 @@ class wordGroupzSql:
                 words.append(row[0])
         c.close()
         return words
-    
+
 
     def add_to_db(self,word, grp, detail):
         conn = sqlite3.connect(db_file_path)
@@ -78,7 +78,7 @@ class wordGroupzSql:
                 values(?,?,?)''', t)
             conn.commit()
         c.close()
-    
+
     def get_details(self,selection):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
@@ -90,14 +90,22 @@ class wordGroupzSql:
             tmp = result.fetchone()
             return tmp[2]
 
-    def update_details(self,details):
+    def update_details(self,tree_value, details):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
-        t = (win.tree_value,)
+        t = (tree_value,)
         c.execute("""update word_groups set details='%s' where word=?"""% (details),t)
         conn.commit()
         c.close()
-    
+
+    def delete_word(self, tree_value):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (tree_value,)
+        c.execute("""delete from word_groups where word=?""",t)
+        conn.commit()
+        c.close()
+
 class wordzGui:
     wordz_db=wordGroupzSql()
     def __init__(self):
@@ -156,9 +164,9 @@ class wordzGui:
                     self.treestore.append(piter, [word])
 
     def tree_select_changed(self, widget=None, event=None):
-        model, iter = self.selection.get_selected()
-        self.tree_value = model.get_value(iter,0)
-        
+        self.model, self.iter = self.selection.get_selected()
+        self.tree_value = self.model.get_value(self.iter,0)
+
         if self.tree_value not in wordz_db.list_groups():
             self.hbox3.show()
             w, h = self.window.get_size()
@@ -175,6 +183,9 @@ class wordzGui:
         buff.set_text(detail)
         self.output_txtview.set_buffer(buff)
 
+    def on_delete_clicked(self, widget=None, event=None):
+        wordz_db.delete_word(self.tree_value)
+        self.treestore.remove(self.iter)
 
     def on_edit_clicked(self, widget=None, event=None):
         self.output_txtview.set_editable(True)
@@ -184,7 +195,7 @@ class wordzGui:
         start = buff.get_iter_at_offset(0)
         end = buff.get_iter_at_offset(-1)
         new_details = buff.get_text(start, end)
-        wordz_db.update_details(new_details)
+        wordz_db.update_details(self.tree_value, new_details)
         self.output_txtview.set_editable(False)
 
     def item_list_changed(self, widget=None, event=None):
@@ -236,7 +247,7 @@ class wordzGui:
         dialog.run()
         dialog.destroy()
 
-    
+
     def on_back_clicked(self, widget, data=None):
         self.treestore.clear()
         for group in wordz_db.list_groups():
