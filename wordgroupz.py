@@ -165,23 +165,24 @@ class wordzGui:
 
     def tree_select_changed(self, widget=None, event=None):
         self.model, self.iter = self.selection.get_selected()
-        self.tree_value = self.model.get_value(self.iter,0)
+        if self.iter is not None:
+            self.tree_value = self.model.get_value(self.iter,0)
 
-        if self.tree_value not in wordz_db.list_groups():
-            self.hbox3.show()
-            w, h = self.window.get_size()
-            self.vpan.set_position(h)
-            tmp = self.vpan.get_position()
-            self.vpan.set_position(int((255.0/450)*h))
-        else:
-            self.vpan.set_position(10000)
-            self.hbox3.hide()
-        if self.output_txtview.get_editable():
-            self.output_txtview.set_editable(False)
-        detail = wordz_db.get_details(self.tree_value)
-        buff = self.output_txtview.get_buffer()
-        buff.set_text(detail)
-        self.output_txtview.set_buffer(buff)
+            if self.tree_value not in wordz_db.list_groups():
+                self.hbox3.show()
+                w, h = self.window.get_size()
+                self.vpan.set_position(h)
+                tmp = self.vpan.get_position()
+                self.vpan.set_position(int((255.0/450)*h))
+            else:
+                self.vpan.set_position(10000)
+                self.hbox3.hide()
+            if self.output_txtview.get_editable():
+                self.output_txtview.set_editable(False)
+            detail = wordz_db.get_details(self.tree_value)
+            buff = self.output_txtview.get_buffer()
+            buff.set_text(detail)
+            self.output_txtview.set_buffer(buff)
 
     def on_delete_clicked(self, widget=None, event=None):
         wordz_db.delete_word(self.tree_value)
