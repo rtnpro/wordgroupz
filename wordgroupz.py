@@ -404,10 +404,21 @@ class wordzGui:
     def on_get_details_clicked(self, widget, data=None):
         word = self.get_word.get_text()
         d = dict()
-        defs = dict.get_def(d, word)
+        defs = d.get_def(word)
         buff = self.details.get_buffer()
         buff.set_text(defs)
         self.details.set_buffer(buff)
+
+    def on_get_details1_clicked(self, widget, data=None):
+        word = self.tree_value
+        d = dict()
+        defs = d.get_def(word)
+        buff = self.output_txtview.get_buffer()
+        end = buff.get_iter_at_offset(-1)
+        buff.place_cursor(end)
+        details = "\n\nDefinition from dict.org:\n" + defs
+        buff.insert_interactive_at_cursor(details, True)
+        
 
 
 
