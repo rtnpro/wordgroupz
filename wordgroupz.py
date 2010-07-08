@@ -19,6 +19,9 @@ import pygtk
 import gtk
 import sqlite3
 import os
+import sys
+import socket
+import string
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
@@ -105,6 +108,148 @@ class wordGroupzSql:
         c.execute("""delete from word_groups where word=?""",t)
         conn.commit()
         c.close()
+
+class dict:
+    def __init__(self, addr = 'tcp!dict.org!2628'):
+        self.sock = self.dial(addr)
+        self.f = self.sock.makefile("r")
+        welcome = self.f.readline()
+        if welcome[0:4] != '220 ':
+            raise Exception("server doesn't want you (%s)" % welcome[0:4])
+        r, _ = self._cmd('CLIENT python client, versionless')
+        if r != '250':
+            raise Exception('sending client string failed')
+
+    def dial(self, dialstr):
+        proto, host, port = string.split(dialstr, '!', 2)
+
+        if proto !='tcp':
+            raise Exception('Protocols other than tcp not implemented.')
+        try:
+            port = int(port)
+        except:
+            pass
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((host, port))
+
+        return sock
+    def definition(self, word, db='!'):
+        for key, value in [('word', word), ('database', db)]:
+            if not self.validword(value):
+                raise Exception('invalid %s: "%s"' % (key, value))
+        r, line = self._cmd('DEFINE %s %s' % (self.quote(db), self.quote(word)))
+        if r == '552':
+            return []
+        if r[0] in ['4', '5']:
+            raise Exception('response to define: %s' % line)
+        defs = []
+        while 1:
+            line = self._read()
+            if line[0:4] == '151 ':
+                _, _, db, dbdescr = self.split(line, ' ', 3)
+                defs.append((db, dbdescr, '\n'.join(self._readlist())))
+            else:
+                break
+        return defs
+
+    def quote(self, word):
+        if ' ' in word or "'" in word or '"' in word:
+            return "'%s'" % string.replace(word, "'", "''")
+        return word
+
+    def split(self, line, delim, num):
+        def unquote(l):
+            if l[0] in ['"', "'"]:
+                q = l[0]
+                offset = 1
+                while 1:
+                    offset = string.find(l[offset:], q)
+                    if offset == -1:
+                        raise Exception('Invalidly quoted line from server')
+
+                    if l[offset-1:offset+1] == (r'\%s' % q):
+                        offset += 1
+                    else:
+                        word = string.replace(l[1:offset+1], r'\%s' % q, q)
+                        l = string.lstrip(l[offset+2:])
+                        break
+            else:
+                word, l = string.split(l, delim, 1)
+            return word, l
+
+        r = []
+        l = line
+        while num != 0:
+            word, l = unquote(l)
+            r.append(word)
+            num -= 1
+        word, rest = unquote(l)
+        r.append(word)
+
+        return r
+
+    def validword(self, s):
+        bad = [chr(i) for i in range(20)]
+        if s == '':
+            return 0
+        for c in s:
+            if c in bad:
+                return 0
+        return 1
+
+    def _cmd(self, cmd):
+        self.sock.sendall(cmd + '\r\n')
+        self.f.flush()
+        line = self._read()
+        code = line[0:3]
+        return code, line
+
+    def _read(self):
+        line = self.f.readline()
+        if line[-1] == '\n':
+            line = line[0:-1]
+        if line[-1] == '\r':
+            line == line[0:-1]
+        return line
+
+    def _readlist(self):
+        lines = []
+        while 1:
+            line = self._read()
+            if line.startswith('.'):
+                break
+            if line[0:2] == '..':
+                line = line[1:]
+            lines.append(line)
+        return lines
+
+    def match(self, word, db='!', strat='.'):
+        for key, value in [('word', word), ('database', db), ('strategy', strat)]:
+            if not self.validword(value):
+                raise Exception('invalid %s: "%s"' % (key, value))
+        r, line = self._cmd('MATCH %s %s %s' % (self.quote(db), self.quote(strat), self.quote(word)))
+        if r == '552':
+            return []
+        if r[0] in ['4', '5']:
+            raise Exception('response to match: %s' % line)
+        lines = [tuple(self.split(l, ' ', 1)) for l in self._readlist()]
+        line = self._read()
+        if line[0:4] != '250 ':
+            raise Exception('expected code 250 after match (%s)' % line)
+        return lines
+    
+    def get_def(self, word):
+        l = self.match(word, db='!', strat='exact')
+        for db, word in l:
+            defs = self.definition(word, db=db)
+            if defs == []:
+                print >> sys.stderr, 'no-match'
+                return 2
+            db, dbdescr, defstr = defs[0]
+            s = '\n\n\n'.join([defstr for _, _, defstr in defs])
+        return s
+    
+
 
 class wordzGui:
     wordz_db=wordGroupzSql()
@@ -255,6 +400,15 @@ class wordzGui:
             piter = self.treestore.append(None, [group])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
+
+    def on_get_details_clicked(self, widget, data=None):
+        word = self.get_word.get_text()
+        d = dict()
+        defs = dict.get_def(d, word)
+        buff = self.details.get_buffer()
+        buff.set_text(defs)
+        self.details.set_buffer(buff)
+
 
 
 if __name__ == "__main__":
