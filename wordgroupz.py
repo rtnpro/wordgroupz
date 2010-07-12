@@ -22,10 +22,12 @@ import os
 import sys
 import socket
 import string
+import nltk_wordnet as wordnet
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 db_file_path = wordgroupz_dir+'/wordz'
+
 class wordGroupzSql:
     def db_init(self):
         if not os.path.exists(wordgroupz_dir):
@@ -109,7 +111,7 @@ class wordGroupzSql:
         conn.commit()
         c.close()
 
-class dict:
+class online_dict:
     def __init__(self, addr = 'tcp!dict.org!2628'):
         self.sock = self.dial(addr)
         self.f = self.sock.makefile("r")
@@ -250,7 +252,6 @@ class dict:
         return s
     
 
-
 class wordzGui:
     wordz_db=wordGroupzSql()
     def __init__(self):
@@ -298,6 +299,14 @@ class wordzGui:
         self.search=self.builder.get_object("search")
         self.search.connect('changed',self.on_search_changed)
 
+        self.chose_dict_hbox = self.builder.get_object('hbox6')
+        self.chose_dict = gtk.combo_box_new_text()
+        for dict in ['online webster', 'offline wordnet']:
+            self.chose_dict.append_text(dict)
+        self.chose_dict.set_active(1)
+        self.chose_dict.show()
+        self.chose_dict_hbox.pack_start(self.chose_dict, True, True, padding = 5)
+    
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
         words = list
@@ -318,7 +327,7 @@ class wordzGui:
                 w, h = self.window.get_size()
                 self.vpan.set_position(h)
                 tmp = self.vpan.get_position()
-                self.vpan.set_position(int((255.0/450)*h))
+                self.vpan.set_position(int((240.0/450)*h))
             else:
                 self.vpan.set_position(10000)
                 self.hbox3.hide()
@@ -403,23 +412,33 @@ class wordzGui:
 
     def on_get_details_clicked(self, widget, data=None):
         word = self.get_word.get_text()
-        d = dict()
-        defs = d.get_def(word)
+        dic = self.chose_dict.get_active_text()
+        if dic == 'online webster':
+            d = online_dict()
+            defs = '\n' + '='*10 + '\n' + d.get_def(word)
+            defs = 'from online webster:\n' + defs
+        elif dic == 'offline wordnet':
+            defs = '\n' + '='*10 + '\n' + wordnet.get_definition(word)
         buff = self.details.get_buffer()
         buff.set_text(defs)
         self.details.set_buffer(buff)
+        
+            
 
     def on_get_details1_clicked(self, widget, data=None):
         word = self.tree_value
-        d = dict()
-        defs = d.get_def(word)
+        dic = self.chose_dict.get_active_text()
+        print dic
+        if dic == 'online webster':
+            d = online_dict()
+            defs = d.get_def(word)
+            defs = '\n' + '='*10 + '\n' + "\nfrom online webster:\n" + defs
+        elif dic == 'offline wordnet':
+            defs = '\n' + '='*10 + '\n' + wordnet.get_definition(word)
         buff = self.output_txtview.get_buffer()
         end = buff.get_iter_at_offset(-1)
         buff.place_cursor(end)
-        details = "\n\nDefinition from dict.org:\n" + defs
-        buff.insert_interactive_at_cursor(details, True)
-        
-
+        buff.insert_interactive_at_cursor(defs, True)
 
 
 if __name__ == "__main__":
