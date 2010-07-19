@@ -1,7 +1,3 @@
-CREDITS:
-The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205
-It has been designed by mazeo.
-
 INSTALL:
 As root, do 'python setup.py install'
 install nltk:
@@ -16,6 +12,11 @@ As root, do 'yum install python-sqlite2'
 nltk - provides Wordnet library for reading from Wordnet dictionary
 webkit
 urllib2
+
+CREDITS:
+The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205
+It has been designed by mazeo.
+
 
 Changes:
 Added offline wordnet dictionary feature:
