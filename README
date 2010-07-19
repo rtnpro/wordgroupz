@@ -4,8 +4,23 @@ It has been designed by mazeo.
 
 INSTALL:
 As root, do 'python setup.py install'
+install nltk:
+    tar xvf nltk-2.0b8.tar.gz
+    cd nltk-2.0b8
+    python setup.py install
 
 DEPENDENCIES:
 python DB-API 2.0 interface for SQLite 3.x
 python-sqlite2 in fedora
 As root, do 'yum install python-sqlite2'
+nltk - provides Wordnet library for reading from Wordnet dictionary
+webkit
+urllib2
+
+Changes:
+Added offline wordnet dictionary feature:
+    untar nltk-2.0b8.tar.gz
+    install it
+    download wordnet.zip from http://rtnpro.fedorapeople.org/wordnet.zip
+    into $(USER)/nltk_data/
+
