@@ -45,9 +45,9 @@ class wordGroupzSql:
         if not 'word_groups' in tables:
             c.execute('''create table word_groups
             (word text, grp text, details text)''')
-        #if not 'groups' in tables:
-         #   c.execute('''create table groups
-          #  (grp text)''')
+        if not 'groups' in tables:
+           c.execute('''create table groups
+           (grp text)''')
         conn.commit()
         c.close()
         conn.close()
@@ -61,7 +61,13 @@ class wordGroupzSql:
                 groups.append(row[0])
         c.close()
         return groups
-
+    def delete_group(self, tree_value):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (tree_value,)
+        c.execute("""delete from groups where grp=?""",t)
+        conn.commit()
+        c.close()
     def list_words_per_group(self,grp):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
@@ -349,6 +355,16 @@ class wordzGui:
         self.status_label.hide()
         self.save_audio = self.builder.get_object('save_audio')
         self.save_audio.set_label('Download pronunciation')
+        self.vbox7 = self.builder.get_object('vbox7')
+        self.hbox2 = self.builder.get_object('hbox2')
+        self.welcome = gtk.Frame()
+        self.hbox2.remove(self.vbox7)
+        self.hbox2.pack_start(self.welcome)
+        self.welcome.show()
+        self.note = gtk.Label()
+        self.note.set_markup('<b>Welcome to wordGroupz</b>')
+        self.note.show()
+        self.welcome.add(self.note)
         
     def look_for_audio(self):
         page = self.browser.get_html()
@@ -364,9 +380,10 @@ class wordzGui:
                 if i.find('videoUrl')>0:
                     self.download_url = i.split(': ')[1].strip('"')
                     print self.download_url
+                    print str(soup.html.title).split(' ')
                     self.save_audio.set_sensitive(True)
-                    self.audio_file = str(soup.html.title).split(' ')[0].strip('<title>')+'.ogg'
-        
+                    self.audio_file = str(soup.html.title).split(' ')[0].split('>')[1]+'.ogg'
+                    print self.audio_file
     def on_save_audio_clicked(self, widget=None, event=None):
         '''
         network_req = webkit.NetworkRequest(self.download_url)
@@ -490,6 +507,9 @@ class wordzGui:
     def tree_select_changed(self, widget=None, event=None):
         self.model, self.iter = self.selection.get_selected()
         if self.iter is not None:
+            if self.welcome is self.hbox2.get_children()[1]:
+                self.hbox2.remove(self.welcome)
+                self.hbox2.pack_start(self.vbox7)
             self.tree_value = self.model.get_value(self.iter,0)
             self.notebook1 = self.builder.get_object('notebook1')
             cur_page = self.notebook1.get_current_page()
@@ -517,8 +537,21 @@ class wordzGui:
             self.output_txtview.set_buffer(buff)
 
     def on_delete_clicked(self, widget=None, event=None):
-        wordz_db.delete_word(self.tree_value)
+        if self.tree_value in wordz_db.list_groups():
+            wordz_db.delete_group(self.tree_value)
+        else:
+            wordz_db.delete_word(self.tree_value)
+            #self.get_group.remove_text(sel)
         self.treestore.remove(self.iter)
+        buff = self.output_txtview.get_buffer()
+        buff.set_text('')
+        self.output_txtview.set_buffer(buff)
+        get_group_ch = self.get_group.child
+        group = get_group_ch.get_text()
+        self.refresh_groups(group, 1)
+        self.hbox2.remove(self.vbox7)
+        self.note.set_text('Nothing selected')
+        self.hbox2.pack_start(self.welcome)
 
     def on_edit_clicked(self, widget=None, event=None):
         self.output_txtview.set_editable(True)
@@ -543,6 +576,7 @@ class wordzGui:
     def on_add_clicked(self, widget, data=None):
         word = self.get_word.get_text()
         get_group_ch = self.get_group.child
+        print type(get_group_ch)
         group = get_group_ch.get_text()
         conts = self.details.get_buffer()
         start = conts.get_iter_at_offset(0)
@@ -562,10 +596,10 @@ class wordzGui:
             self.item_list.append_text(widget.get_text())
             widget.set_text('')
 
-    def refresh_groups(self, grp):
+    def refresh_groups(self, grp, flag=0):
         tmp = wordz_db.list_groups()
         n = len(tmp)
-        for i in range(0,n):
+        for i in range(0,n+flag):
             self.get_group.remove_text(0)
         for x in tmp:
             self.get_group.append_text(x)

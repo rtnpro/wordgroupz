@@ -432,7 +432,18 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkHBox" id="hbox7">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">2</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -466,12 +477,13 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="button4">
+                              <object class="GtkButton" id="edit">
                                 <property name="label">gtk-edit</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_stock">True</property>
+                                <signal name="clicked" handler="on_edit_clicked"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -479,12 +491,13 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="button5">
+                              <object class="GtkButton" id="save">
                                 <property name="label">gtk-save</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_stock">True</property>
+                                <signal name="clicked" handler="on_save_clicked"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -492,12 +505,13 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="button6">
+                              <object class="GtkButton" id="delete">
                                 <property name="label">gtk-delete</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_stock">True</property>
+                                <signal name="clicked" handler="on_delete_clicked"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
