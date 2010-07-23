@@ -28,6 +28,8 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 #import threads
 import urllib
+import pygst
+import gst
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 audio_file_path = wordgroupz_dir + '/audio'
@@ -365,6 +367,48 @@ class wordzGui:
         self.note.set_markup('<b>Welcome to wordGroupz</b>')
         self.note.show()
         self.welcome.add(self.note)
+        self.toolbar = self.builder.get_object('toolbar1')
+        self.speak_icon = gtk.Image()
+        self.speak_icon.set_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_MENU)
+        self.speak_button = self.toolbar.append_item(
+            '',
+            'Speak',
+            'Private',
+            self.speak_icon,
+            self.on_speak_clicked
+            )
+        self.toolbar.append_space()
+        #tool_item = self.toolbar.get_nth_item(1)
+        #tool_item.set_expand(False)
+
+        self.player = gst.element_factory_make("playbin2", "player")
+        fakesink = gst.element_factory_make("fakesink", "fakesink")
+        self.player.set_property("video-sink", fakesink)
+        bus = self.player.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message", self.on_message)
+
+    def on_speak_clicked(self, widget=None, event=None):
+        filepath = audio_file_path+'/'+self.tree_value+'.ogg'
+        print filepath
+        if os.path.isfile(filepath):
+            self.player.set_property("uri", "file://" + filepath)
+            self.player.set_state(gst.STATE_PLAYING)
+        else:
+            self.player.set_state(gst.STATE_NULL)
+
+    def on_message(self, bus, message):
+        t = message.type
+        if t == gst.MESSAGE_EOS:
+            self.player.set_state(gst.STATE_NULL)
+        elif t == gst.MESSAGE_ERROR:
+            self.player.set_state(gst.STATE_NULL)
+            err, debug = message.parse_error()
+            print "Error: %s" % err, debug
+
+
+    def hello(self,widget=None, event=None):
+        print 'hello'
         
     def look_for_audio(self):
         page = self.browser.get_html()
