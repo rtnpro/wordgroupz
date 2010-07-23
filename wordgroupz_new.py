@@ -341,10 +341,10 @@ class wordzGui:
         self.treeview.show()
         self.scrolledwindow2 = self.builder.get_object("scrolledwindow2")
         self.scrolledwindow2.add_with_viewport(self.treeview)
-        """
+        
         self.search=self.builder.get_object("search")
         self.search.connect('changed',self.on_search_changed)
-
+        """
         self.chose_dict_hbox = self.builder.get_object('hbox6')
         self.chose_dict = gtk.combo_box_new_text()
         for dict in ['online webster', 'offline wordnet']:
@@ -392,7 +392,7 @@ class wordzGui:
         self.welcome.add(self.note)
         self.toolbar = self.builder.get_object('toolbar1')
         self.speak_icon = gtk.Image()
-        self.speak_icon.set_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_MENU)
+        self.speak_icon.set_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_SMALL_TOOLBAR)
         self.speak_button = self.toolbar.append_item(
             '',
             'Speak',
@@ -410,6 +410,10 @@ class wordzGui:
         bus = self.player.get_bus()
         bus.add_signal_watch()
         bus.connect("message", self.on_message)
+
+        #wiktionary
+        self.wiki_word = ''
+        self.browser_load_status = ''
 
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
@@ -446,10 +450,10 @@ class wordzGui:
             for i in l:
                 if i.find('videoUrl')>0:
                     self.download_url = i.split(': ')[1].strip('"')
-                    print self.download_url
-                    print str(soup.html.title).split(' ')
+                    #print self.download_url
+                    self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
                     self.save_audio.set_sensitive(True)
-                    self.audio_file = str(soup.html.title).split(' ')[0].split('>')[1]+'.ogg'
+                    self.audio_file = self.wiki_word+'.ogg'
                     print self.audio_file
     def on_save_audio_clicked(self, widget=None, event=None):
         '''
@@ -495,10 +499,12 @@ class wordzGui:
     
     def load_progress_changed(self, webview, amount):
         self.progress.set_fraction(amount/100.0)
+        self.browser_load_status='loading'
 
     def load_started(self, webview, frame):
         self.progress.set_visible(True)
         self.save_audio.set_sensitive(False)
+        self.browser_load_status='started'
 
     def load_finished(self, webview, frame):
         self.progress.set_visible(False)  
@@ -506,6 +512,7 @@ class wordzGui:
         self.status_label.hide()
         self.status_label.set_text('') 
         self.look_for_audio()
+        self.browser_load_status = 'finished'
                  
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):        
@@ -556,8 +563,12 @@ class wordzGui:
         width, height = self.window.get_size()
         if page_num==1:
             self.window.resize(max(width, 800), max(height, 550))
-            self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
-            self.browser.open(self.url)
+            print self.tree_value, self.wiki_word, self.browser_load_status
+            if self.tree_value is self.wiki_word and self.browser_load_status is 'finished' or 'loading':
+                pass
+            else:
+                self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
+                self.browser.open(self.url)
         elif page_num == 0:
             self.window.resize(min(width, 700), min(height, 550))
             
