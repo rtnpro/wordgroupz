@@ -285,7 +285,7 @@ class online_dict:
                 return 2
             db, dbdescr, defstr = defs[0]
             s = '\n\n\n'.join([defstr for _, _, defstr in defs])
-        print s
+        #print s
         return s
 
 class WebView(webkit.WebView):
@@ -344,15 +344,21 @@ class wordzGui:
         
         self.search=self.builder.get_object("search")
         self.search.connect('changed',self.on_search_changed)
-        """
-        self.chose_dict_hbox = self.builder.get_object('hbox6')
+        
+        self.chose_dict_hbox = self.builder.get_object('hbox7')
+        vseparator = gtk.VSeparator()
+        vseparator.show()
+        self.chose_dict_hbox.pack_start(vseparator, False, padding=5)
+        label = gtk.Label('Dictionary')
+        label.show()
+        self.chose_dict_hbox.pack_start(label, False)
         self.chose_dict = gtk.combo_box_new_text()
         for dict in ['online webster', 'offline wordnet']:
             self.chose_dict.append_text(dict)
         self.chose_dict.set_active(1)
         self.chose_dict.show()
-        self.chose_dict_hbox.pack_start(self.chose_dict, True, True, padding = 5)
-        """
+        self.chose_dict_hbox.pack_start(self.chose_dict, False, True, padding = 5)
+        
         #webkit in scrolledwindow4
         self.web_vbox = gtk.VBox()
         self.scroller = gtk.ScrolledWindow()
@@ -390,6 +396,7 @@ class wordzGui:
         self.note.set_markup('<b>Welcome to wordGroupz</b>')
         self.note.show()
         self.welcome.add(self.note)
+        '''
         self.toolbar = self.builder.get_object('toolbar1')
         self.speak_icon = gtk.Image()
         self.speak_icon.set_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_SMALL_TOOLBAR)
@@ -402,8 +409,7 @@ class wordzGui:
             )
         self.toolbar.append_space()
         #tool_item = self.toolbar.get_nth_item(1)
-        #tool_item.set_expand(False)
-
+        #tool_item.set_expand(False)'''
         self.player = gst.element_factory_make("playbin2", "player")
         fakesink = gst.element_factory_make("fakesink", "fakesink")
         self.player.set_property("video-sink", fakesink)
@@ -415,9 +421,34 @@ class wordzGui:
         self.wiki_word = ''
         self.browser_load_status = ''
 
+        #Menubar
+        
+        '''self.file_item = gtk.MenuItem('_File')
+        self.dict_item = gtk.MenuItem('_Dictionary')
+        self.help_item = gtk.MenuItem('_Help')'''
+        self.file_item = self.builder.get_object('file_item')
+        self.help_item = self.builder.get_object('help_item')
+        self.file_item_sub = gtk.Menu()
+        self.quit = gtk.MenuItem('_Quit')
+        self.file_item_sub.append(self.quit)
+        self.quit.show()
+        self.help_item_sub = gtk.Menu()
+        self.about = gtk.MenuItem('_About')
+        self.about.show()
+        self.help_item_sub.append(self.about)
+
+        self.file_item.set_submenu(self.file_item_sub)
+        self.help_item.set_submenu(self.help_item_sub)
+
+        self.about.connect('activate', self.on_about_clicked)
+        self.quit.connect('activate', self.on_MainWindow_destroy)
+
+        self.selected_word = self.builder.get_object('word_sel')
+        self.selected_word.hide()
+
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
-        print filepath
+        #print filepath
         if os.path.isfile(filepath):
             self.player.set_property("uri", "file://" + filepath)
             self.player.set_state(gst.STATE_PLAYING)
@@ -454,7 +485,7 @@ class wordzGui:
                     self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
                     self.save_audio.set_sensitive(True)
                     self.audio_file = self.wiki_word+'.ogg'
-                    print self.audio_file
+                    #print self.audio_file
     def on_save_audio_clicked(self, widget=None, event=None):
         '''
         network_req = webkit.NetworkRequest(self.download_url)
@@ -558,12 +589,12 @@ class wordzGui:
         print notebook1.get_current_page()"""
 
     def on_notebook1_switch_page(self, notebook, page, page_num):
-        print 'page switched'
-        print page_num
+        #print 'page switched'
+        #print page_num
         width, height = self.window.get_size()
         if page_num==1:
             self.window.resize(max(width, 800), max(height, 550))
-            print self.tree_value, self.wiki_word, self.browser_load_status
+            #print self.tree_value, self.wiki_word, self.browser_load_status
             if self.tree_value is self.wiki_word and self.browser_load_status is 'finished' or 'loading':
                 pass
             else:
@@ -589,6 +620,8 @@ class wordzGui:
                 self.hbox2.remove(self.welcome)
                 self.hbox2.pack_start(self.vbox7)
             self.tree_value = self.model.get_value(self.iter,0)
+            self.selected_word.show()
+            self.selected_word.set_text(self.tree_value)
             self.notebook1 = self.builder.get_object('notebook1')
             cur_page = self.notebook1.get_current_page()
             if cur_page is 1:
@@ -597,7 +630,7 @@ class wordzGui:
                 #self.get_audio()
 
             if self.tree_value not in wordz_db.list_groups():
-                print self.tree_value
+                #print self.tree_value
                 self.hbox3.show()
                 '''
                 w, h = self.window.get_size()
@@ -694,10 +727,17 @@ class wordzGui:
 
     def on_back_clicked(self, widget, data=None):
         self.treestore.clear()
+        self.search.set_text('')
         for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
+        buff = self.output_txtview.get_buffer()
+        buff.set_text('Nothing selected')
+        self.output_txtview.set_buffer(buff)
+        self.selected_word.set_text('')
+        self.selected_word.hide()
+
 
     def on_get_details_clicked(self, widget, data=None):
         word = self.get_word.get_text()
@@ -717,7 +757,7 @@ class wordzGui:
     def on_get_details1_clicked(self, widget, data=None):
         word = self.tree_value
         dic = self.chose_dict.get_active_text()
-        print dic
+        #print dic
         if dic == 'online webster':
             d = online_dict()
             defs = d.get_def(word)
