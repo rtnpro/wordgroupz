@@ -26,10 +26,10 @@ import nltk_wordnet as wordnet
 import webkit
 import urllib2
 from BeautifulSoup import BeautifulSoup
-#import threads
 import urllib
 import pygst
 import gst
+
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 audio_file_path = wordgroupz_dir + '/audio'
@@ -49,8 +49,15 @@ class wordGroupzSql:
             (word text, grp text, details text)''')
         if not 'groups' in tables:
            c.execute('''create table groups
-           (grp text)''')
+           (grp text, details text)''')
         conn.commit()
+        #alter table to port to new db format
+        c.execute("""select * from groups""")
+        group_cols = [i[0] for i in c.description]
+        for i in ['grp', 'details']:
+            if i not in group_cols:
+                c.execute("""alter table groups add column details text""")
+                conn.commit()
         c.close()
         conn.close()
 
@@ -86,11 +93,19 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         conn.text_factory = str
-        t = (grp,)
         if grp not in self.list_groups() and grp is not '':
-            c.execute("""insert into groups values (?)""",t)
+            if word is '':
+                t = (grp,detail)
+            else:
+                t = (grp,'')
+            c.execute("""insert into groups values (?,?)""",t)
             conn.commit()
-        if word is not '' and word not in self.list_words_per_group(grp) and grp is not '':
+        #allow words with no groups to be added
+        elif 'no-category' not in self.list_groups() and grp is '':
+            c.execute("""insert into groups values ('no-category','Uncategorized words')""")
+        if word is not '' and word not in self.list_words_per_group(grp):
+            if grp == '':
+                grp = 'no-category'
             t = (word, grp, detail)
             c.execute('''insert into word_groups
                 values(?,?,?)''', t)
@@ -101,8 +116,16 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         t = (selection, )
-        if selection in self.list_groups() or selection is '':
-            return "No word selected"
+        if selection in self.list_groups():
+            t = (selection,)
+            c.execute("""select details from groups where grp=?""",t)
+            tmp = c.fetchone()[0]
+            if tmp is None:
+                return ''
+            else:
+                return tmp
+        elif selection is None:
+            return "Nothing selected"
         else:
             result = c.execute("""select word,grp,details from word_groups where word=?""",t)
             tmp = result.fetchone()
@@ -620,7 +643,6 @@ class wordzGui:
     def on_add_clicked(self, widget, data=None):
         word = self.get_word.get_text()
         get_group_ch = self.get_group.child
-        print type(get_group_ch)
         group = get_group_ch.get_text()
         conts = self.details.get_buffer()
         start = conts.get_iter_at_offset(0)
