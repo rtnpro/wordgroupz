@@ -2,8 +2,14 @@
 
 import sys
 from nltk.corpus import wordnet
-
+import os
+nltk_dir = os.environ['HOME']+'/nltk_data/corpora'
 def get_definition(word):
+    if not os.path.exists(nltk_dir):
+        os.makedirs(nltk_dir)
+    if os.path.exists('/usr/share/wordnet-3.0/dict') and not os.path.exists(nltk_dir+'/wordnet'):
+        os.symlink('/usr/share/wordnet-3.0/dict',nltk_dir+'/wordnet')
+
     synsets = wordnet.synsets(word)
     s = "from offline_wordnet: "
     s = s + '\n' + word

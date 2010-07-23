@@ -301,7 +301,7 @@ class wordzGui:
     wordz_db=wordGroupzSql()
     def __init__(self):
         self.builder = gtk.Builder()
-        self.builder.add_from_file("wordgroupz_new.glade")
+        self.builder.add_from_file("wordgroupz.glade")
         self.window = self.builder.get_object("MainWindow")
         self.window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
         self.window.set_title("wordGroupz")
