@@ -7,10 +7,10 @@ install nltk:
 
 DEPENDENCIES:
 python DB-API 2.0 interface for SQLite 3.x
-python-sqlite2 in fedora
-As root, do 'yum install python-sqlite2'
-nltk - provides Wordnet library for reading from Wordnet dictionary
-webkit
+python-sqlite2
+pygtk2
+python-nltk
+pywebkitgtk
 urllib2
 
 CREDITS:
@@ -19,9 +19,12 @@ It has been designed by mazeo.
 
 
 Changes:
-Added offline wordnet dictionary feature:
-    untar nltk-2.0b8.tar.gz
-    install it
-    download wordnet.zip from http://rtnpro.fedorapeople.org/wordnet.zip
-    into $(USER)/nltk_data/
+2010-07-23 rtnpro rtnpro@gmail.com
+    * Release version 0.3b
+    * Added wiktionary support, download pronunciation files from wiktionary
+    if available
+    * Changed GUI, added online dict.org and offline wordnet
+    support for getting word definition
 
+2010-06-24 rtnpro rtnpro@gmail.com
+    * Released version 0.2
