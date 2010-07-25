@@ -7,7 +7,7 @@ import wordgroupz
 class games_GUI:
     def __init__(self):
         self.builder = gtk.Builder()
-        self.builder.add_from_file('wordgroupz.glade')
+        self.builder.add_from_file('games.glade')
         self.builder.connect_signals(self)
         self.window = self.builder.get_object('games')
         self.flash_data = db.get_details_for_flashcard()

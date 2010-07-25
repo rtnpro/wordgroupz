@@ -1,8 +1,10 @@
 nltk_wordnet.py
 wordgroupz.py
 wordgroupz.glade
+games.glade
 wordgroupz
 setup.py
+games.py
 icons/wordgroupz.png
 wordgroupz.desktop
 README
