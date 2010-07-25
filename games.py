@@ -18,6 +18,10 @@ class games_GUI:
         self.flash_label.set_text(self.flash_data[self.current_index][0])
         self.check = self.builder.get_object('check')
         self.count = len(self.flash_data)
+        self.count_label = self.builder.get_object('label1')
+        self.correct_label = self.builder.get_object('label2')
+        self.incorrect_label = self.builder.get_object('label3')
+        self.count_label.set_text(str(self.count))
         #self.check.connect('clicked', self.on_check_clicked)
         self.correct = []
         self.incorrect = []
@@ -40,16 +44,23 @@ class games_GUI:
             self.current_index = self.current_index + 1
             self.flash_frame.set_label('word')
             self.flash_label.set_text(self.flash_data[self.current_index][0])
+        elif self.current_index in range((self.count -2),self.count):
+            self.current_index = self.current_index + 1
 
     def on_iknow_clicked(self, widget=None, event=None):
-        self.correct_no = self.correct_no + 1
-        self.correct.append(self.flash_data[self.current_index])
-        self.proceed()
+        print self.current_index
+        if self.current_index <= (self.count - 1):
+            self.correct_no = self.correct_no + 1
+            self.correct_label.set_text(str(self.correct_no))
+            self.correct.append(self.flash_data[self.current_index])
+            self.proceed()
 
     def on_idunno_clicked(self, widget=None, event=None):
-        self.incorrect_no = self.incorrect_no + 1
-        self.incorrect.append(self.flash_data[self.current_index])
-        self.proceed()
+        if self.current_index <= self.count - 1:
+            self.incorrect_no = self.incorrect_no + 1
+            self.incorrect_label.set_text(str(self.incorrect_no))
+            self.incorrect.append(self.flash_data[self.current_index])
+            self.proceed()
 
 if __name__ == '__main__':
     db = wordgroupz.wordGroupzSql()
