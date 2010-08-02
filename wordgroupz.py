@@ -28,6 +28,8 @@ from BeautifulSoup import BeautifulSoup
 import urllib
 import pygst
 import gst
+import pango
+import re
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
@@ -50,6 +52,9 @@ class wordGroupzSql:
            c.execute('''create table groups
            (grp text, details text)''')
         conn.commit()
+        #if not 'wiktionary' in tables:
+        #    c.execute('''create table wiktionary
+        #   ()''')
         #alter table to port to new db format
         c.execute("""select * from groups""")
         group_cols = [i[0] for i in c.description]
@@ -145,6 +150,15 @@ class wordGroupzSql:
         c.execute("""delete from word_groups where word=?""",t)
         conn.commit()
         c.close()
+
+
+    def get_details_for_flashcard(self):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        c.execute("""select word, details from word_groups order by word""")
+        return c.fetchall()
+        c.close()
+        conn.close()
 
 class online_dict:
     def __init__(self, addr = 'tcp!dict.org!2628'):
@@ -312,6 +326,9 @@ class wordzGui:
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         #self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
+        #pango
+        self.fontdesc = pango.FontDescription("Purisa 10")
+        self.output_txtview.modify_font(self.fontdesc)
         for x in wordz_db.list_groups():
             self.get_group.append_text(x)
         self.table1 = self.builder.get_object("table1")
@@ -364,10 +381,11 @@ class wordzGui:
         self.browser = WebView()
         #self.browser.settings.enable_universal_access_from_file_uris(True)
         self.settings = self.browser.get_settings()
-        self.settings.set_property("enable-file-access-from-file-uris", True)
+        #self.settings.set_property("enable-file-access-from-file-uris", True)
         self.settings.set_property('enable-page-cache', True)
-        self.settings.set_property('user-stylesheet-uri', 'file://main.css')
+        self.settings.set_property('user-stylesheet-uri', 'http://rtnpro.fedorapeople.org/main.css')
         self.settings.set_property('enable-universal-access-from-file-uris', True)
+        self.browser.set_settings(self.settings)
         self.browser.show()
         self.scroller.add(self.browser)
         self.web_vbox.pack_start(self.scroller)
@@ -378,9 +396,11 @@ class wordzGui:
         self.browser.connect("load-finished", self.load_finished)
         #self.browser.connect('navigation-requested', self._navigation_requested_cb)
         self.web_vbox.pack_start(self.progress, False)
+        
         self.vbox9 = self.builder.get_object('vbox9')
         self.vbox9.pack_start(self.web_vbox)
-        self.vbox9.show_all()
+        self.web_vbox.show()
+        self.vbox9.show()
         self.status_label = self.builder.get_object('label9')
         self.status_label.hide()
         self.save_audio = self.builder.get_object('save_audio')
@@ -444,6 +464,7 @@ class wordzGui:
 
         self.selected_word = self.builder.get_object('word_sel')
         self.selected_word.hide()
+        self.audio_found = False
 
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
@@ -541,35 +562,76 @@ class wordzGui:
         self.status_label.set_text('Content loaded.')
         self.status_label.hide()
         self.status_label.set_text('') 
-        self.look_for_audio()
+        
         self.browser_load_status = 'finished'
-                 
-        
-    def on_lookup_wiki_clicked(self, widget=None,event=None):        
-        url = 'http://en.wiktionary.org/wiki/' + self.tree_value
-        
-        """opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        html = opener.open(url).read()
-
+        if self.audio_found == True:
+            self.save_audio.set_sensitive(True)
+        else:
+            pass
+            
+        if self.count == 0:
+            self.count = 1
+        else:
+            self.look_for_audio()
+            return
+        html = self.browser.get_html()
+        self.head_file = open('wiktionary_header', 'r')
+        self.head = self.head_file.read()
+        self.head_file.close()
+        self.head = self.head.replace('enter_title', self.tree_value)
         #self.status_label.set_text('Scrapping...')
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(self.head+'<body>'+html+'</body></html>')
 
         #extract contents
-        for i in soup.html.body.findAll('div', {'id' : 'content'}):
-            contents = i
-        soup.find(href='http://bits.wikimedia.org/skins-1.5/monobook/main.css?283l').replaceWith('<link rel="stylesheet" href="http://rtnpro.fedorapeople.org/main.css" type="text/css" media="screen" />')
-        head = soup.html.head
-        tmp = '<html>' + '\n' + str(head) + '\n' + '<body>\n' + str(contents) + '\n</body>' + '</html>'
+        div = soup.findAll('div', attrs={'id':'ogg_player_1'})
+        print div
+        if div is None:
+            print "No audio available"
+            self.word_audio_found = False
+        else:
+            #print 'hi'
+            l = str(div).split(',')
+            for i in l:
+                if i.find('videoUrl')>0:
+                    self.download_url = i.split(': ')[1].strip('"')
+                    print self.download_url
+                    #self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
+                    self.save_audio.set_sensitive(True)
+                    self.audio_file = self.tree_value+'.ogg'
+                    self.audio_found = True
+                    #print self.audio_file
+                    
+        self.audio_checked = True
+        #for i in soup.html.body.findAll('div', {'id' : 'content'}):
+        #    contents = i
+        #soup.find(href='http://bits.wikimedia.org/skins-1.5/monobook/main.css?283n').replaceWith('<link rel="stylesheet" href="http://rtnpro.fedorapeople.org/main.css" type="text/css" media="screen" />')
+        for i in soup.findAll('table', attrs={'class' : 'audiotable'}):
+            i.extract()
+        tmp =  str(soup)
         self.tmp = tmp
         self.status_label.set_text('Loading content...')
-        self.browser.load_string(tmp, "text/html", "iso-8859-15", url)
-        file = open('tmp.html', 'w')
-        file.write(tmp)
-        file.close()"""
+        self.browser.load_string(tmp, "text/html", "utf-8", self.url)
+        self.browser.show()
+
         
-        self.browser.open(url)    
-        
+    def on_lookup_wiki_clicked(self, widget=None,event=None):
+        self.count = 0
+        url = 'http://en.wiktionary.org/wiki/' + self.tree_value + '?action=render'
+        self.url = url
+        #html = urllib.urlopen(self.url).read()
+        #soup = BeautifulSoup(html)
+        #opener = urllib2.build_opener()
+        #opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        #html = opener.open(url).read()
+        #file = open('tmp.html', 'w')
+        #file.write(tmp)
+        #file.close()
+        #change jul 27
+        #self.scroller.remove(self.browser)
+        #self.browser.open(url)
+        #self.browser.hide()
+        self.browser.open(self.url)
+        self.browser.hide()
 
     def on_backward_clicked(self, widget):
         #print 'back clicked'
@@ -594,11 +656,12 @@ class wordzGui:
         if page_num==1:
             self.window.resize(max(width, 800), max(height, 550))
             #print self.tree_value, self.wiki_word, self.browser_load_status
-            if self.tree_value is self.wiki_word and self.browser_load_status is 'finished' or 'loading':
+            if self.selected_word is self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
                 pass
             else:
-                self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
-                self.browser.open(self.url)
+                #self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
+                #self.browser.open(self.url)
+                self.on_lookup_wiki_clicked()
         elif page_num == 0:
             self.window.resize(min(width, 700), min(height, 550))
             
@@ -619,13 +682,15 @@ class wordzGui:
                 self.hbox2.remove(self.welcome)
                 self.hbox2.pack_start(self.vbox7)
             self.tree_value = self.model.get_value(self.iter,0)
+            #print self.tree_value
             self.selected_word.show()
             self.selected_word.set_text(self.tree_value)
             self.notebook1 = self.builder.get_object('notebook1')
             cur_page = self.notebook1.get_current_page()
             if cur_page is 1:
-                self.url = ('http://en.wiktionary.org/wiki/'+self.tree_value)
-                self.browser.open(self.url)
+                #self.url = ('http://en.wiktionary.org/wiki/'+self.tree_value)
+                #self.browser.open(self.url)
+                self.on_lookup_wiki_clicked()
                 #self.get_audio()
 
             if self.tree_value not in wordz_db.list_groups():
@@ -645,6 +710,7 @@ class wordzGui:
             buff = self.output_txtview.get_buffer()
             buff.set_text(detail)
             self.output_txtview.set_buffer(buff)
+            self.output_txtview.modify_font(self.fontdesc)
 
     def on_delete_clicked(self, widget=None, event=None):
         if self.tree_value in wordz_db.list_groups():
@@ -772,6 +838,7 @@ class wordzGui:
 if __name__ == "__main__":
     wordz_db=wordGroupzSql()
     wordz_db.db_init()
+    gtk.gdk.threads_init()
     win = wordzGui()
     win.window.show()
     gtk.main()
