@@ -25,8 +25,8 @@ def get_definition(word):
         os.symlink('/usr/share/wordnet-3.0/dict',nltk_dir+'/wordnet')
 
     synsets = wordnet.synsets(word)
-    s = "from offline_wordnet: "
-    s = s + '\n' + word
+    #s = "from offline_wordnet: "
+    s = ''
     p = ''
     for synset in synsets:
         pos, type_ = synset.lexname.split('.')

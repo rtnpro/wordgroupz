@@ -469,18 +469,7 @@
                             <property name="hscrollbar_policy">automatic</property>
                             <property name="vscrollbar_policy">automatic</property>
                             <child>
-                              <object class="GtkViewport" id="viewport3">
-                                <property name="visible">True</property>
-                                <property name="resize_mode">queue</property>
-                                <child>
-                                  <object class="GtkTextView" id="textview2">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="right_margin">100</property>
-                                    <property name="indent">3</property>
-                                  </object>
-                                </child>
-                              </object>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
