@@ -30,8 +30,9 @@ Now, when you click on a word from the words treeview on the left hand
 side, you see , in place of the welcome screen, the details for the word.
 You will be able to see a "Play" button, "Delete" button and a "Dictionary"
 drop down list. You can play the pronunciation of a word by clicking on the
-"Play" button, delete the selected word by clicking on the "Delete" button, choose dictionary to be used to get word definition when 
-"Get details" button under "Notes" is clicked.
+"Play" button, delete the selected word by clicking on the "Delete" button,
+choose dictionary to be used to get word definition when "Get details" button
+under "Notes" is clicked.
 
 The "Details" tab shows you a well organized definitions of the word from
 the respective dictionaries. This is READ_ONLY.
