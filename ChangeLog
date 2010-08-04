@@ -1,0 +1,9 @@
+2010-07-23 rtnpro rtnpro@gmail.com
+    * Release version 0.3b
+    * Added wiktionary support, download pronunciation files from wiktionary
+    if available
+    * Changed GUI, added online dict.org and offline wordnet
+    support for getting word definition
+
+2010-06-24 rtnpro rtnpro@gmail.com
+    * Released version 0.2

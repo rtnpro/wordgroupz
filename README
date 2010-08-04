@@ -1,9 +1,50 @@
+INTRODUCTION:
+wordGroupz is a vocabulary building application which helps you to
+store any word you come across classified into different groups. It 
+also features offline wordnet dictionary support and online wiktionary
+and webster dictionary support. You can research about a word with the
+help of the wiktionary browser, and write down your own notes for a word
+if required. It also has pronunciation support for words downloaded from
+ wiktionary.
+
+It is a free software licensed under the GNU General Public License version
+ 2 and is written in pygtk/Python.
+ 
+This project is hosted at http://gitorious.org/wordgroupz/ and its wiki is
+located at http://gitorious.org/wordgroupz/pages/Home
+
+USAGE:
+When you first open wordGroupz (Applications->Education->wordgroupz), you 
+see a welcome screen, with the stored wordlist on the left hand side, and
+below it, the interface to add a word to the database.
+
+To add a word, you can enter a word in the "Word" textBox, then select
+or add a new group from the "Group" drop down menu or leave it blank.
+Then you may add some notes for your word or keep it blank. When you click
+the "Add" button, the word and its details get saved in the database.
+
+You can search for a word in the word list by typing the word in the search
+bar above the word list display.
+
+Now, when you click on a word from the words treeview on the left hand
+side, you see , in place of the welcome screen, the details for the word.
+You will be able to see a "Play" button, "Delete" button and a "Dictionary"
+drop down list. You can play the pronunciation of a word by clicking on the
+"Play" button, delete the selected word by clicking on the "Delete" button, choose dictionary to be used to get word definition when 
+"Get details" button under "Notes" is clicked.
+
+The "Details" tab shows you a well organized definitions of the word from
+the respective dictionaries. This is READ_ONLY.
+
+The "Wiktionary" tab lets you search for the selected word in wiktionary, 
+http://en.wiktionary.org/ . You can reload the wiktionary page for the
+word selected word. Using the "Back" and "Forward" button, you can go 
+backwards and forwards through the opened web pages.
+
+The "Notes" tab lets you add or edit existing notes for the selected word.
+
 INSTALL:
 As root, do 'python setup.py install'
-install nltk:
-    tar xvf nltk-2.0b8.tar.gz
-    cd nltk-2.0b8
-    python setup.py install
 
 DEPENDENCIES:
 python DB-API 2.0 interface for SQLite 3.x
@@ -12,6 +53,8 @@ pygtk2
 python-nltk
 pywebkitgtk
 urllib2
+python-BeautifulSoup
+gstreamer-python
 
 CREDITS:
 The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205

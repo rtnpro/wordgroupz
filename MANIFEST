@@ -5,8 +5,13 @@ games.glade
 wordgroupz
 setup.py
 games.py
+get_fields.py
+html2text.py
+wiktionary_header
 icons/wordgroupz.png
 wordgroupz.desktop
 README
 COPYING
+INSTALL
+ChangeLog
 MANIFEST

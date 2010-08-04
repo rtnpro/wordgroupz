@@ -16,7 +16,7 @@ setup(name='wordgroupz',
       data_files=[('/usr/share/applications',['wordgroupz.desktop']),
           ('/usr/bin',['wordgroupz']),
           ('/usr/share/pixmaps',['icons/wordgroupz.png']),
-          ('/usr/share/wordgroupz',['wordgroupz.glade','wordgroupz.py','nltk_wordnet.py', 'games.py', 'games.glade'])],
+          ('/usr/share/wordgroupz',['wordgroupz.glade','wordgroupz.py','nltk_wordnet.py', 'games.py', 'games.glade', 'get_fields.py', 'html2text.py', 'wiktionary_header'])],
 
  #       cmdclass = { "build" : build_extra.build_extra,
  #                    "build_i18n" : build_i18n.build_i18n },
