@@ -153,7 +153,7 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         t = (tree_value,)
-        c.execute("""update word_groups set details='%s' where word=?"""% (details),t)
+        c.execute("""update word_groups set details="%s" where word=?"""% (details),t)
         conn.commit()
         c.close()
 
@@ -178,11 +178,12 @@ class wordGroupzSql:
     def save_wiktionary(self, word, data):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
+        conn.text_factory = str
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set wiktionary='%s' where grp=?"""%(data), t)
+            c.execute("""update groups set wiktionary="%s" where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set wiktionary='%s' where word=?"""%(data), t)
+            c.execute("""update word_groups set wiktionary="%s" where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -190,11 +191,12 @@ class wordGroupzSql:
     def save_wordnet(self, word, data):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
+        conn.text_factory = str
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set wordnet='%s' where grp=?"""%(data), t)
+            c.execute("""update groups set wordnet="%s" where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set wordnet='%s' where word=?"""%(data), t)
+            c.execute("""update word_groups set wordnet="%s" where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -202,11 +204,12 @@ class wordGroupzSql:
     def save_webster(self, word, data):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
+        conn.text_factory = str
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set webster='%s' where grp=?"""%(data), t)
+            c.execute("""update groups set webster="%s" where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set webster='%s' where word=?"""%(data), t)
+            c.execute("""update word_groups set webster="%s" where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -720,6 +723,7 @@ class wordzGui:
                     self.download_url = i.split(': ')[1].strip('"')
                     #print self.download_url
                     self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
+                    print "wiki_word" + self.wiki_word
                     self.save_audio.set_sensitive(True)
                     self.audio_file = self.wiki_word+'.ogg'
                     #print self.audio_file
@@ -802,6 +806,7 @@ class wordzGui:
         #extract contents
         div = soup.findAll('div', attrs={'id':'ogg_player_1'})
         print div
+        self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
         if div is None:
             print "No audio available"
             self.word_audio_found = False
@@ -812,7 +817,8 @@ class wordzGui:
                 if i.find('videoUrl')>0:
                     self.download_url = i.split(': ')[1].strip('"')
                     print self.download_url
-                    #self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
+                    self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
+                    print 'wiki_word'+self.wiki_word
                     self.save_audio.set_sensitive(True)
                     self.audio_file = self.tree_value+'.ogg'
                     self.audio_found = True
@@ -885,13 +891,14 @@ class wordzGui:
         if page_num==1:
             self.window.resize(max(width, 800), max(height, 550))
             #print self.tree_value, self.wiki_word, self.browser_load_status
-            if self.selected_word is self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
+            if self.tree_value == self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
                 pass
             else:
                 #self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
                 #self.browser.open(self.url)
                 self.on_lookup_wiki_clicked()
         elif page_num == 0:
+            self.show_details_tree()
             self.window.resize(min(width, 700), min(height, 550))
             
     def on_search_changed(self,widget=None,event=None):
@@ -945,13 +952,11 @@ class wordzGui:
 
     def show_details_tree(self):
         wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
-        #print wn
         ws = wordz_db.get_dict_data('webster', self.tree_value)[0]
         wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0]
         self.details_treestore.clear()
-        if wn is not None:
+        if wn != u'':
             t = wn.split('\n')
-            #print t
             piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
             for x in t:
                 if not x.startswith('\t') and x is not u'':
@@ -960,11 +965,9 @@ class wordzGui:
                     sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
                 elif x.startswith('\tSynonyms:'):
                     self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
-        if wik is not None:
+        if wik is not u'':
             t = wik.split('\n')
             piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
-            #sub_iter = self.details_treestore.append(piter, [wik])
-            print t
             for x in t:
                 if x.startswith('#'):
                     sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
