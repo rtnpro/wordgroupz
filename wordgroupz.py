@@ -667,10 +667,12 @@ class wordzGui:
         #details treeview
         self.details_treestore = gtk.TreeStore(str)
         self.details_treeview = gtk.TreeView(self.details_treestore)
-        self.details_tvcolumn = gtk.TreeViewColumn('Details')
-        self.details_treeview.append_column(self.details_tvcolumn)
+        
+        
         self.details_cell = gtk.CellRendererText()
-        self.details_tvcolumn.pack_start(self.details_cell, True)
+        self.details_tvcolumn = gtk.TreeViewColumn('Details',self.details_cell,markup=0)
+        self.details_treeview.append_column(self.details_tvcolumn)
+        #self.details_tvcolumn.pack_start(self.details_cell, True)
         self.details_tvcolumn.add_attribute(self.details_cell, 'text', 0)
         self.details_treeview.set_search_column(0)
         self.details_tvcolumn.set_sort_column_id(0)
@@ -828,22 +830,17 @@ class wordzGui:
         self.browser.load_string(tmp, "text/html", "utf-8", self.url)
         self.browser.show()
         txt_html = html2text(tmp, self.url)
-        file = open('tmp','w')
-        file.write(txt_html)
-        file.close()
-        g = get_fields.get_wiki_data(txt_html)
-        g.get_contents()
-        g.get_eng_fields()
-        g.get_field_details()
-        file = open('data/'+self.tree_value+'.wiki', 'w')
-        print g.dict.keys()
-        for i in g.dict.keys():
-            #print i
-            print g.dict[i]
-            file.write(i+':\n')
-            for j in g.dict[i]:
-                file.write(j+'\n')
-        file.close()
+        #file = open('tmp','w')
+        #file.write(txt_html)
+        #file.close()
+        #g = get_fields.get_wiki_data(txt_html)
+        #g.get_contents()
+        #g.get_eng_fields()
+        #g.get_field_details()
+        #file = open('data/'+self.tree_value+'.wiki', 'w')
+        #print g.dict.keys()
+        wiki_txt = get_fields.main(txt_html)
+        wordz_db.save_wiktionary(self.tree_value, wiki_txt)
 
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):
@@ -948,22 +945,40 @@ class wordzGui:
 
     def show_details_tree(self):
         wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
-        print wn
+        #print wn
         ws = wordz_db.get_dict_data('webster', self.tree_value)[0]
         wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0]
         self.details_treestore.clear()
         if wn is not None:
             t = wn.split('\n')
             #print t
-            piter = self.details_treestore.append(None, ['Wordnet'])
+            piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
             for x in t:
                 if not x.startswith('\t') and x is not u'':
-                    sub_iter = self.details_treestore.append(piter, [x])
+                    sub_iter = self.details_treestore.append(piter, ['<b>'+x+'</b>'])
                 elif x.startswith('\t') and not x.startswith('\tSynonyms:'):
                     sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
                 elif x.startswith('\tSynonyms:'):
-                    self.details_treestore.append(sub_sub_iter, [x.strip('\t')])
-
+                    self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
+        if wik is not None:
+            t = wik.split('\n')
+            piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
+            #sub_iter = self.details_treestore.append(piter, [wik])
+            print t
+            for x in t:
+                if x.startswith('#'):
+                    sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
+                elif not x.startswith('\t') and not x.startswith('#'):
+                    self.details_treestore.append(sub_iter, [x])
+                elif x.startswith('\t#'):
+                    sub_sub_iter = self.details_treestore.append(sub_iter, ['<b>'+x.lstrip('\t#')+'</b>'])
+                elif x.startswith('\t') and not x.startswith('\t#'):
+                    self.details_treestore.append(sub_sub_iter, [x.lstrip('\t')])
+                elif x.startswith('\t\t#'):
+                    sub_sub_sub_iter = self.details_treestore.append(sub_iter, ['<i>'+x.lstrip('\t\t#')+'</i>'])
+                elif x.startswith('\t\t') and not x.startswith('\t\t#'):
+                    self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])
+        #print self.details_cell.get_property('is-expander')
         self.details_treeview.expand_all()
     def on_delete_clicked(self, widget=None, event=None):
         if self.tree_value in wordz_db.list_groups():
