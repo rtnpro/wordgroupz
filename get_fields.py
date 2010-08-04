@@ -9,11 +9,11 @@ import re
 
 class get_wiki_data:
     def __init__(self, filename):
-        #self.f = open(filename, 'r')
-        self.s = filename
-        #self.s = self.f.read()
+        self.f = open(filename, 'r')
+        #self.s = filename
+        self.s = self.f.read()
         self.sections = self.s.split('\n## ')
-        self.pos = ['Noun', 'Verb', 'Pronoun', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Interjection', 'Antonyms', 'Synonyms']
+        self.pos = ['Noun', 'Verb', 'Pronoun', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Interjection', 'Antonyms', 'Synonyms', 'Derived terms']
 
     def get_contents(self):
         for i in self.sections:
@@ -67,6 +67,12 @@ class get_wiki_data:
                             i.remove(j)
                     i = '\n'.join(i)
                     self.dict[key][index] = i
+
+        for i in self.dict[u'Derived terms']:
+            index = self.dict[u'Derived terms'].index(i)
+            i = i.replace('\n\n', '\n')
+            self.dict[u'Derived terms'][index] = i
+            
             #print self.dict[key]
 
     def show(self, key):
@@ -84,42 +90,9 @@ class get_wiki_data:
                 self.eng_sec = i
         #print self.eng_sec
         self.eng_secs = self.eng_sec.split('\n###')
-        print self.eng_secs
+        #print self.eng_secs
         count = 0
         for i in self.eng_secs:
-            #count = 0
-            #self.dict[' '.join(self.fields[count])] = i
-            #count = count + 19
-            '''
-            i = i.split('[')
-            print i[3]+'^s'
-            for j in i:
-                if j.find(']')>=0:
-                    t = j.find(']')
-                    sub = j[0:t+1]
-                    if sub.rstrip(']').isdigit():
-                        new = j[t+1:-1]
-                    else:
-                        new = j[0:t] + j[t+1:-1]
-                    index = i.index(j)
-                    #i.remove(j)
-                    #i.insert(index, new)
-                    i[index]=new
-                 else:
-                     index=i.index(j)
-                     i[index]=j
-            i =  ''.join(i)'''
-            #print i
-            '''print i
-            links = re.findall('\[.*?\]', i)
-            print links
-            for link in links:
-                if link.strip('[').strip(']').isdigit:
-                    i = i.replace(link, '')
-                else:
-                    i = i.replace(link, link.strip('[').strip(']'))
-                    print i'''
-                    
             t = i.split('\n')
             if t[0].find('Etymology')>= 0:
                 #print '^i\n'+i
@@ -144,10 +117,90 @@ class get_wiki_data:
         #print self.dict.keys()
 
     #def cleanup(self):
-        
+    def save_str(self):
+        s = ''
+        for i in self.fields[1:-1]:
+            if len(i[0]) == 3:
+                for key in self.dict.keys():
+                    if i[1] == key:
+                        s = s + '#' + i[1]
+                        self.dict[key][0] = self.dict[key][0].split('\n')
+                        for i in self.dict[key][0]:
+                            line = i
+                            line = line.replace('*', '')
+                            line = line.replace('_', '')
+                            line = line.strip()
+                            self.dict[key][0][self.dict[key][0].index(i)] = line
+                        self.dict[key][0] = '\n'.join(self.dict[key][0])
+                        s = s + '\n' + self.dict[key][0] + '\n'
+                    elif i[1].find(key)>=0:
+                        s = s + '#' + i[1]
+                        #self.dict[key][0]
+                        self.dict[key][0] = self.dict[key][0].split('\n')
+                        for i in self.dict[key][0]:
+                            line = i
+                            line = line.replace('*', '')
+                            line = line.replace('_', '')
+                            line = line.strip()
+                            self.dict[key][0][self.dict[key][0].index(i)] = line
+                        self.dict[key][0] = '\n'.join(self.dict[key][0])
+                        s = s + '\n' + self.dict[key][0] + '\n'
+                        self.dict[key].remove(self.dict[key][0])
+            elif len(i[0]) == 5:
+                for key in self.dict.keys():
+                    if i[1] == key:
+                        if len(self.dict[key]) > 0:
+                            s = s + '\t#' + key
+                            self.dict[key][0] = self.dict[key][0].split('\n')
+                            for i in self.dict[key][0]:
+                                line = i
+                                line = line.replace('*', '')
+                                line = line.replace('_', '')
+                                line = line.strip()
+                                line = '\t'+line
+                                self.dict[key][0][self.dict[key][0].index(i)] = line
+                            self.dict[key][0] = '\n'.join(self.dict[key][0])
+                            s = s + '\n' + self.dict[key][0] + '\n'
+                            self.dict[key].remove(self.dict[key][0])
 
-if __name__ == '__main__':
-    g = get_wiki_data('tmp')
+            elif len(i[0]) == 7:
+                for key in self.dict.keys():
+                    if i[1] == key:
+                        if len(self.dict[key]) > 0:
+                            s = s + '\t\t#' + key
+                            self.dict[key][0] = self.dict[key][0].split('\n')
+                            for i in self.dict[key][0]:
+                                line = i
+                                line = line.replace('*', '')
+                                line = line.replace('_', '')
+                                line = line.strip()
+                                line = '\t\t'+line
+                                self.dict[key][0][self.dict[key][0].index(i)] = line
+                            self.dict[key][0] = '\n'.join(self.dict[key][0])
+                            s = s + '\n' + self.dict[key][0] + '\n'
+                            self.dict[key].remove(self.dict[key][0])
+                
+        return s
+def main(txt_html):
+    g = get_wiki_data(txt_html)
     g.get_contents()
     g.get_eng_fields()
     g.get_field_details()
+    data = g.save_str()
+    return data
+
+
+if __name__ == '__main__':
+    g = get_wiki_data('tmp.bak')
+    g.get_contents()
+    g.get_eng_fields()
+    g.get_field_details()
+    g.save_str()
+
+
+
+
+
+
+
+    

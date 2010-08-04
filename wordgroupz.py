@@ -141,7 +141,7 @@ class wordGroupzSql:
             if tmp is None:
                 return ''
             else:
-                return tmp
+                return tmp.strip("'")
         elif selection is None:
             return "Nothing selected"
         else:
@@ -153,7 +153,10 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         t = (tree_value,)
-        c.execute("""update word_groups set details="%s" where word=?"""% (details),t)
+        if tree_value in self.list_groups():
+            c.execute("""update groups set details='''%s''' where grp=?"""%(details),t)
+        else:
+            c.execute("""update word_groups set details='''%s''' where word=?"""% (details),t)
         conn.commit()
         c.close()
 
@@ -181,9 +184,9 @@ class wordGroupzSql:
         conn.text_factory = str
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set wiktionary="%s" where grp=?"""%(data), t)
+            c.execute("""update groups set wiktionary='''%s''' where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set wiktionary="%s" where word=?"""%(data), t)
+            c.execute("""update word_groups set wiktionary='''%s''' where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -194,9 +197,9 @@ class wordGroupzSql:
         conn.text_factory = str
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set wordnet="%s" where grp=?"""%(data), t)
+            c.execute("""update groups set wordnet='''%s''' where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set wordnet="%s" where word=?"""%(data), t)
+            c.execute("""update word_groups set wordnet='''%s''' where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -205,11 +208,13 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         conn.text_factory = str
+        data = data.replace('"', '')
+        data = data.replace("'", "")
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set webster="%s" where grp=?"""%(data), t)
+            c.execute('''update groups set webster="""%s""" where grp=?'''%(data), t)
         else:
-            c.execute("""update word_groups set webster="%s" where word=?"""%(data), t)
+            c.execute('''update word_groups set webster="""%s""" where word=?'''%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -229,6 +234,74 @@ class wordGroupzSql:
         c.close()
         conn.close()
         return data[0]
+
+    def check_ws(self, word):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (word,)
+        if word in self.list_groups():
+            c.execute("""select webster from groups where grp=?""",t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        else:
+            c.execute("""select webster from word_groups where word=?""", t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        c.close()
+        conn.close()
+        print data
+        return status
+
+    def check_wn(self, word):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (word,)
+        if word in self.list_groups():
+            c.execute("""select wordnet from groups where grp=?""",t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        else:
+            c.execute("""select wordnet from word_groups where word=?""", t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        c.close()
+        conn.close()
+        return status
+
+    def check_wik(self, word):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (word,)
+        if word in self.list_groups():
+            c.execute("""select wiktionary from groups where grp=?""",t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        else:
+            c.execute("""select wiktionary from word_groups where word=?""", t)
+            data = c.fetchall()[0][0]
+            if data is None:
+                status = False
+            else:
+                status = True
+        c.close()
+        conn.close()
+        return status
+        
 
 class online_dict:
     def __init__(self, addr = 'tcp!dict.org!2628'):
@@ -536,8 +609,8 @@ class wordzGui:
         self.get_group.show()
         self.table1.attach(self.get_group, 1,2,1,2)
 
-        self.hbox3 = self.builder.get_object("hbox3")
-        self.hbox3.hide()
+        self.hbox5 = self.builder.get_object("hbox5")
+        self.hbox5.hide()
         self.treestore = gtk.TreeStore(str)
         for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
@@ -551,7 +624,7 @@ class wordzGui:
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
-        self.treeview.set_reorderable(True)
+        self.treeview.set_reorderable(False)
         self.selection = self.treeview.get_selection()
         self.selection.connect('changed', self.tree_select_changed)
         self.treeview.set_tooltip_text("Shows words classified in groups")
@@ -570,7 +643,7 @@ class wordzGui:
         label.show()
         self.chose_dict_hbox.pack_start(label, False)
         self.chose_dict = gtk.combo_box_new_text()
-        for dict in ['online webster', 'offline wordnet']:
+        for dict in ['webster', 'wordnet', 'wiktionary']:
             self.chose_dict.append_text(dict)
         self.chose_dict.set_active(1)
         self.chose_dict.show()
@@ -602,8 +675,8 @@ class wordzGui:
         self.vbox9.pack_start(self.web_vbox)
         self.web_vbox.show()
         self.vbox9.show()
-        self.status_label = self.builder.get_object('label9')
-        self.status_label.hide()
+        #self.status_label = self.builder.get_object('label9')
+        #self.status_label.hide()
         self.save_audio = self.builder.get_object('save_audio')
         self.save_audio.set_label('Download pronunciation')
         self.vbox7 = self.builder.get_object('vbox7')
@@ -679,7 +752,7 @@ class wordzGui:
         self.details_tvcolumn.add_attribute(self.details_cell, 'text', 0)
         self.details_treeview.set_search_column(0)
         self.details_tvcolumn.set_sort_column_id(0)
-        self.details_treeview.set_reorderable(True)
+        self.details_treeview.set_reorderable(False)
         self.details_treeview.show_all()
         self.details_treeview.expand_all()
         self.scroller3 = self.builder.get_object('scrolledwindow3')
@@ -780,9 +853,9 @@ class wordzGui:
 
     def load_finished(self, webview, frame):
         self.progress.set_visible(False)  
-        self.status_label.set_text('Content loaded.')
-        self.status_label.hide()
-        self.status_label.set_text('') 
+        #self.status_label.set_text('Content loaded.')
+        #self.status_label.hide()
+        #self.status_label.set_text('') 
         
         self.browser_load_status = 'finished'
         if self.audio_found == True:
@@ -832,7 +905,7 @@ class wordzGui:
             i.extract()
         tmp =  str(soup)
         self.tmp = tmp
-        self.status_label.set_text('Loading content...')
+        #self.status_label.set_text('Loading content...')
         self.browser.load_string(tmp, "text/html", "utf-8", self.url)
         self.browser.show()
         txt_html = html2text(tmp, self.url)
@@ -929,10 +1002,10 @@ class wordzGui:
                 self.on_lookup_wiki_clicked()
                 #self.get_audio()
 
-            if self.tree_value not in wordz_db.list_groups():
-                #print self.tree_value
-                self.hbox3.show()
-                '''
+            #if self.tree_value not in wordz_db.list_groups():
+            #print self.tree_value
+            self.hbox5.show()
+            '''
                 w, h = self.window.get_size()
                 self.vpan.set_position(h)
                 tmp = self.vpan.get_position()
@@ -940,20 +1013,20 @@ class wordzGui:
             else:
                 self.vpan.set_position(10000)
                 self.hbox3.hide()'''
-            '''
+            
             if self.output_txtview.get_editable():
                 self.output_txtview.set_editable(False)
             detail = wordz_db.get_details(self.tree_value)
             buff = self.output_txtview.get_buffer()
             buff.set_text(detail)
             self.output_txtview.set_buffer(buff)
-            self.output_txtview.modify_font(self.fontdesc)'''
+            self.output_txtview.modify_font(self.fontdesc)
             self.show_details_tree()
 
     def show_details_tree(self):
         wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
         ws = wordz_db.get_dict_data('webster', self.tree_value)[0]
-        wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0]
+        wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0].strip("'")
         self.details_treestore.clear()
         if wn != u'':
             t = wn.split('\n')
@@ -965,22 +1038,28 @@ class wordzGui:
                     sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
                 elif x.startswith('\tSynonyms:'):
                     self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
-        if wik is not u'':
+        if wik != u'':
             t = wik.split('\n')
             piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
             for x in t:
                 if x.startswith('#'):
                     sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
-                elif not x.startswith('\t') and not x.startswith('#'):
+                elif not x.startswith('\t') and not x.startswith('#') and not x.startswith('\t#'):
                     self.details_treestore.append(sub_iter, [x])
                 elif x.startswith('\t#'):
                     sub_sub_iter = self.details_treestore.append(sub_iter, ['<b>'+x.lstrip('\t#')+'</b>'])
-                elif x.startswith('\t') and not x.startswith('\t#'):
+                elif x.startswith('\t') and not x.startswith('\t#') and not x.startswith('\t\t'):
                     self.details_treestore.append(sub_sub_iter, [x.lstrip('\t')])
                 elif x.startswith('\t\t#'):
-                    sub_sub_sub_iter = self.details_treestore.append(sub_iter, ['<i>'+x.lstrip('\t\t#')+'</i>'])
+                    print x.split('#')
+                    sub_sub_sub_iter = self.details_treestore.append(sub_sub_iter, ['<b>'+x.lstrip('\t\t#')+'</b>'])
                 elif x.startswith('\t\t') and not x.startswith('\t\t#'):
-                    self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])
+                    #print x
+                    if x.strip('\t\t') != '':
+                        if x.find('terms derived from')>=0:
+                            self.details_treestore.append(sub_sub_sub_iter, ['<u><i>'+ x.lstrip('\t\t')+'</i></u>'])
+                        else:
+                            self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])
         #print self.details_cell.get_property('is-expander')
         self.details_treeview.expand_all()
     def on_delete_clicked(self, widget=None, event=None):
@@ -1095,12 +1174,24 @@ class wordzGui:
         word = self.tree_value
         dic = self.chose_dict.get_active_text()
         #print dic
-        if dic == 'online webster':
-            d = online_dict()
-            defs = d.get_def(word)
-            defs = '\n' + '='*10 + '\n' + "\nfrom online webster:\n" + defs
-        elif dic == 'offline wordnet':
-            defs = '\n' + '='*10 + '\n' + wordnet.get_definition(word)
+        if dic == 'webster':
+            if wordz_db.check_ws(self.tree_value):
+                defs = wordz_db.get_dict_data(dic, self.tree_value)[0]
+            else:
+                d = online_dict()
+                defs = d.get_def(word)
+                wordz_db.save_webster(self.tree_value, defs)
+            defs = '\n' + "webster:\n" + defs
+        elif dic == 'wordnet':
+            if wordz_db.check_wn(self.tree_value):
+                defs = wordz_db.get_dict_data(dic, self.tree_value)[0]
+            else:
+                defs = wordnet.get_definition(word)
+            defs = '\n'+'wordnet:\n' + defs
+        elif dic == 'wiktionary':
+            if wordz_db.check_wik(self.tree_value):
+                defs = wordz_db.get_dict_data(dic, self.tree_value)[0].strip("'")
+            defs = '\n'+'wiktionary:\n'+defs
         buff = self.output_txtview.get_buffer()
         end = buff.get_iter_at_offset(-1)
         buff.place_cursor(end)
