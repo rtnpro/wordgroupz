@@ -8,3 +8,5 @@ pygtk2
 python-nltk
 pywebkitgtk
 urllib2
+python-BeautifulSoup
+gstreamer-python
