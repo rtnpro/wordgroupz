@@ -32,6 +32,41 @@ import pango
 import re
 from html2text import *
 import get_fields
+import thread
+import threading
+
+class get_details(threading.Thread):
+    def run(self):
+        word = win.tree_value
+        dic = win.chose_dict.get_active_text()
+        #print dic
+        if dic == 'webster':
+            print wordz_db.check_ws(win.tree_value)
+            if wordz_db.check_ws(win.tree_value):
+                defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
+            else:
+                d = online_dict()
+                defs = d.get_def(word)
+                wordz_db.save_webster(win.tree_value, defs)
+            defs = '\n' + "webster:\n" + defs + '\n'
+        elif dic == 'wordnet':
+            if wordz_db.check_wn(win.tree_value):
+                defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
+            else:
+                defs = wordnet.get_definition(word)
+            defs = '\n' + 'wordnet:\n' + defs + '\n'
+        elif dic == 'wiktionary':
+            print  wordz_db.check_wik(win.tree_value)
+            if wordz_db.check_wik(win.tree_value):
+                defs = wordz_db.get_dict_data(dic, win.tree_value)[0].strip("'").strip('"')
+                defs = '\n' + 'wiktionary:\n'+defs + '\n'
+            else:
+                defs = ''
+        buff = win.output_txtview.get_buffer()
+        end = buff.get_iter_at_offset(-1)
+        buff.place_cursor(end)
+        buff.insert_interactive_at_cursor(defs, True)
+
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
@@ -153,10 +188,12 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         t = (tree_value,)
+        details = details.replace('"', "\'")
+        #details = details.replace("'", "\'")
         if tree_value in self.list_groups():
-            c.execute("""update groups set details='''%s''' where grp=?"""%(details),t)
+            c.execute("""update groups set details="%s" where grp=?"""%(details),t)
         else:
-            c.execute("""update word_groups set details='''%s''' where word=?"""% (details),t)
+            c.execute("""update word_groups set details="%s" where word=?"""% (details),t)
         conn.commit()
         c.close()
 
@@ -182,11 +219,14 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         conn.text_factory = str
+        #data = data.replace("'", "\'")
+        data = data.replace('"', "'")
+        #print [data]
         t = (word,)
         if word in self.list_groups():
-            c.execute("""update groups set wiktionary='''%s''' where grp=?"""%(data), t)
+            c.execute('''update groups set wiktionary="%s" where grp=?'''%(data), t)
         else:
-            c.execute("""update word_groups set wiktionary='''%s''' where word=?"""%(data), t)
+            c.execute('''update word_groups set wiktionary= "%s" where word=?'''%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -196,10 +236,12 @@ class wordGroupzSql:
         c = conn.cursor()
         conn.text_factory = str
         t = (word,)
+        data = data.replace("'", "\'")
+        data = data.replace('"', '\"')
         if word in self.list_groups():
-            c.execute("""update groups set wordnet='''%s''' where grp=?"""%(data), t)
+            c.execute("""update groups set wordnet="%s" where grp=?"""%(data), t)
         else:
-            c.execute("""update word_groups set wordnet='''%s''' where word=?"""%(data), t)
+            c.execute("""update word_groups set wordnet="%s" where word=?"""%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -208,13 +250,13 @@ class wordGroupzSql:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         conn.text_factory = str
-        data = data.replace('"', '')
-        data = data.replace("'", "")
+        data = data.replace('"', "\'")
+        #data = data.replace("'", "\'")
         t = (word,)
         if word in self.list_groups():
-            c.execute('''update groups set webster="""%s""" where grp=?'''%(data), t)
+            c.execute('''update groups set webster="%s" where grp=?'''%(data), t)
         else:
-            c.execute('''update word_groups set webster="""%s""" where word=?'''%(data), t)
+            c.execute('''update word_groups set webster="%s" where word=?'''%(data), t)
         conn.commit()
         c.close()
         conn.close()
@@ -242,20 +284,21 @@ class wordGroupzSql:
         if word in self.list_groups():
             c.execute("""select webster from groups where grp=?""",t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
         else:
             c.execute("""select webster from word_groups where word=?""", t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
         c.close()
         conn.close()
-        print data
+        #print 'webster'
+        #print [data]
         return status
 
     def check_wn(self, word):
@@ -265,14 +308,14 @@ class wordGroupzSql:
         if word in self.list_groups():
             c.execute("""select wordnet from groups where grp=?""",t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
         else:
             c.execute("""select wordnet from word_groups where word=?""", t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
@@ -287,14 +330,14 @@ class wordGroupzSql:
         if word in self.list_groups():
             c.execute("""select wiktionary from groups where grp=?""",t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
         else:
             c.execute("""select wiktionary from word_groups where word=?""", t)
             data = c.fetchall()[0][0]
-            if data is None:
+            if data is None or data is u'':
                 status = False
             else:
                 status = True
@@ -1171,37 +1214,43 @@ class wordzGui:
             
 
     def on_get_details1_clicked(self, widget, data=None):
-        word = self.tree_value
+        #thread.start_new_thread(self.on_get_details1_clicked,(self,''))
+        """word = self.tree_value
         dic = self.chose_dict.get_active_text()
         #print dic
         if dic == 'webster':
+            print wordz_db.check_ws(self.tree_value)
             if wordz_db.check_ws(self.tree_value):
                 defs = wordz_db.get_dict_data(dic, self.tree_value)[0]
             else:
                 d = online_dict()
                 defs = d.get_def(word)
                 wordz_db.save_webster(self.tree_value, defs)
-            defs = '\n' + "webster:\n" + defs
+            defs = '\n' + "webster:\n" + defs + '\n'
         elif dic == 'wordnet':
             if wordz_db.check_wn(self.tree_value):
                 defs = wordz_db.get_dict_data(dic, self.tree_value)[0]
             else:
                 defs = wordnet.get_definition(word)
-            defs = '\n'+'wordnet:\n' + defs
+            defs = '\n' + 'wordnet:\n' + defs + '\n'
         elif dic == 'wiktionary':
+            print  wordz_db.check_wik(self.tree_value)
             if wordz_db.check_wik(self.tree_value):
-                defs = wordz_db.get_dict_data(dic, self.tree_value)[0].strip("'")
-            defs = '\n'+'wiktionary:\n'+defs
+                defs = wordz_db.get_dict_data(dic, self.tree_value)[0].strip("'").strip('"')
+                defs = '\n' + 'wiktionary:\n'+defs + '\n'
+            else:
+                defs = ''
         buff = self.output_txtview.get_buffer()
         end = buff.get_iter_at_offset(-1)
         buff.place_cursor(end)
-        buff.insert_interactive_at_cursor(defs, True)
-
+        buff.insert_interactive_at_cursor(defs, True)"""
+        th.start()
 
 if __name__ == "__main__":
     wordz_db=wordGroupzSql()
     wordz_db.db_init()
-    gtk.gdk.threads_init()
     win = wordzGui()
     win.window.show()
+    th = get_details()
+    gtk.gdk.threads_init()
     gtk.main()
