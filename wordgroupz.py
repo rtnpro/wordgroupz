@@ -13,7 +13,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+import cgi
 import pygtk
 import gtk
 import sqlite3
@@ -35,7 +35,8 @@ import get_fields
 import thread
 import threading
 
-class get_details(threading.Thread):
+class get_def_thread(threading.Thread):
+    stopthread = threading.Event()
     def run(self):
         word = win.tree_value
         dic = win.chose_dict.get_active_text()
@@ -661,13 +662,19 @@ class wordzGui:
                 self.treestore.append(piter, [word])
         self.treeview = gtk.TreeView(self.treestore)
         self.tvcolumn = gtk.TreeViewColumn('Word Groups')
+        #self.tvcolumn1 = gtk.TreeViewColumn('')
         self.treeview.append_column(self.tvcolumn)
+        #self.treeview.append_column(self.tvcolumn1)
         self.cell = gtk.CellRendererText()
+        #self.cell1 = gtk.CellRendererPixbuf()
+        #self.tvcolumn1 = gtk.TreeViewColumn('', self.cell1)
         self.tvcolumn.pack_start(self.cell, True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(False)
+        #self.tvcolumn1.pack_start(self.cell1, True)
+        #self.tvcolumn1.add_attribute(self.cell1, 'active', 1 )
         self.selection = self.treeview.get_selection()
         self.selection.connect('changed', self.tree_select_changed)
         self.treeview.set_tooltip_text("Shows words classified in groups")
@@ -681,16 +688,13 @@ class wordzGui:
         self.chose_dict_hbox = self.builder.get_object('hbox7')
         vseparator = gtk.VSeparator()
         vseparator.show()
-        self.chose_dict_hbox.pack_start(vseparator, False, padding=5)
-        label = gtk.Label('Dictionary')
-        label.show()
-        self.chose_dict_hbox.pack_start(label, False)
+
         self.chose_dict = gtk.combo_box_new_text()
         for dict in ['webster', 'wordnet', 'wiktionary']:
             self.chose_dict.append_text(dict)
         self.chose_dict.set_active(1)
         self.chose_dict.show()
-        self.chose_dict_hbox.pack_start(self.chose_dict, False, True, padding = 5)
+        self.hbox5.pack_start(self.chose_dict, False, True, padding = 5)
         
         #webkit in scrolledwindow4
         self.web_vbox = gtk.VBox()
@@ -799,8 +803,11 @@ class wordzGui:
         self.details_treeview.show_all()
         self.details_treeview.expand_all()
         self.scroller3 = self.builder.get_object('scrolledwindow3')
-        self.scroller3.add(self.details_treeview)
-        self.scroller3.show()
+        #self.scroller3.add(self.details_treeview)
+        #self.scroller3.show()
+        self.vbox12 = self.builder.get_object('vbox12')
+        self.vbox8 = self.builder.get_object('vbox8')
+        #self.vbox12.set_spacing(10)
 
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
@@ -961,8 +968,11 @@ class wordzGui:
         #g.get_field_details()
         #file = open('data/'+self.tree_value+'.wiki', 'w')
         #print g.dict.keys()
+        #print txt_html
         wiki_txt = get_fields.main(txt_html)
+        print wiki_txt
         wordz_db.save_wiktionary(self.tree_value, wiki_txt)
+        print wordz_db.get_dict_data('wiktionary', self.tree_value)
 
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):
@@ -1005,14 +1015,15 @@ class wordzGui:
         #print page_num
         width, height = self.window.get_size()
         if page_num==1:
-            self.window.resize(max(width, 800), max(height, 550))
+            #self.window.resize(max(width, 800), max(height, 550))
             #print self.tree_value, self.wiki_word, self.browser_load_status
+            '''
             if self.tree_value == self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
                 pass
             else:
                 #self.url = 'http://en.wiktionary.org/wiki/' + self.tree_value
                 #self.browser.open(self.url)
-                self.on_lookup_wiki_clicked()
+                #self.on_lookup_wiki_clicked()'''
         elif page_num == 0:
             self.show_details_tree()
             self.window.resize(min(width, 700), min(height, 550))
@@ -1042,8 +1053,9 @@ class wordzGui:
             if cur_page is 1:
                 #self.url = ('http://en.wiktionary.org/wiki/'+self.tree_value)
                 #self.browser.open(self.url)
-                self.on_lookup_wiki_clicked()
+                #self.on_lookup_wiki_clicked()
                 #self.get_audio()
+                pass
 
             #if self.tree_value not in wordz_db.list_groups():
             #print self.tree_value
@@ -1067,44 +1079,266 @@ class wordzGui:
             self.show_details_tree()
 
     def show_details_tree(self):
-        wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
-        ws = wordz_db.get_dict_data('webster', self.tree_value)[0]
-        wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0].strip("'")
         self.details_treestore.clear()
-        if wn != u'':
-            t = wn.split('\n')
-            piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
-            for x in t:
-                if not x.startswith('\t') and x is not u'':
-                    sub_iter = self.details_treestore.append(piter, ['<b>'+x+'</b>'])
-                elif x.startswith('\t') and not x.startswith('\tSynonyms:'):
-                    sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
-                elif x.startswith('\tSynonyms:'):
-                    self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
+        wn = ''
+        wik = ''
+        ws = ''
+        for i in self.vbox12.get_children():
+            self.vbox12.remove(i)
+        for i in self.vbox8.get_children():
+            self.vbox8.remove(i)
+        try:
+            wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
+        except:
+            pass
+        try:
+            ws = wordz_db.get_dict_data('webster', self.tree_value)[0]
+        except:
+            pass
+        try:
+            wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0].strip("'")
+            print "wiktionary"+ wik
+        except:
+            pass
+        
+        try:
+            if wn != u'':
+                table = gtk.Table(columns=2)
+                table.show()
+                self.vbox12.pack_start(table, False, padding = 5)
+                i = 0
+                t = wn.split('\n')
+                piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
+                for x in t:
+                    if not x.startswith('\t') and x is not u'':
+                        #sub_iter = self.details_treestore.append(piter, ['<b>'+x+'</b>'])
+                        #hbox_n = gtk.HBox()
+                        event_b = gtk.EventBox()
+                        event_b.set_visible_window(True)
+                        event_b.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                        frame = gtk.Frame()
+                        frame.set_shadow_type(gtk.SHADOW_OUT)
+                        #frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
+                        frame.show()
+                        
+                        event_b.show()
+                        #hbox_n.pack_start(frame, false)
+                        #hbox_n.show_all()
+                        label = gtk.Label(x)
+                        label.set_alignment(0.0, 0)
+                        #hbox_n.pack_start(label, False, padding = 2)
+                        table.attach(label, 0, 1, i, i+1, xoptions = gtk.FILL)
+                        label.show()
+                        #hbox_n.pack_start(frame, padding = 10)
+                        table.attach(frame, 1, 2, i, i+1)
+                        table.set_row_spacing(i, 10)
+                        table.set_col_spacing(0, 5)
+                        #hbox_n.show()
+                        #self.vbox12.pack_start(hbox_n, False, padding=5)
+                        vbox = gtk.VBox()
+                        vbox.show_all()
+                        event_b.add(vbox)
+                        frame.add(event_b)
+                        i = i + 1
+                    elif x.startswith('\t') and not x.startswith('\tSynonyms:'):
+                        #sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
+                        vbox1 = gtk.VBox()
+                        label = gtk.Label()
+                        l = len(x.strip('\t'))
+                        label.set_markup('<b><big>'+x.strip('\t')[0:2]+'</big></b>'+x.strip('\t')[2:l])
+                        #label.set_markup(x.strip('\t'))
+                        ##print x.lstrip('\t')[0:2]
+                        #l = len(x.strip('\t'))
+                        #print x.lstrip('\t')[0:l]
+                        if self.window.get_size() == self.window.get_default_size():
+                            label.set_line_wrap(True)
+                        label.set_selectable(True)
+                        label.set_alignment(0.0, 0.5)
+                        label.show()
+                        #label.show()
+                        vbox1.pack_start(label, True)
+                        vbox1.show()
+                        vbox.pack_start(vbox1, False)
+                        
+                    elif x.startswith('\tSynonyms:'):
+                        #self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
+                        frame = gtk.Frame('Synonyms')
+                        label = gtk.Label()
+                        label.set_markup(('<b><span foreground="white">'+ cgi.escape(x.strip('\tSynonyms:')) + '</span></b>'))
+                        label.set_alignment(0.0, 0.5)
+                        label.show()
+                        eventbox = gtk.EventBox()
+                        eventbox.set_visible_window(True)
+                        eventbox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
+                        #eventbox.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+                        eventbox.add(label)
+                        eventbox.show()
+                        frame.add(eventbox)
+                        frame.show()
+                        hbox = gtk.HBox()
+                        label = gtk.Label(' '*5)
+                        #label.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
+                        label.show()
+                        hbox.pack_start(label, False)
+                        hbox.pack_start(frame)
+                        hbox.show()
+                        vbox1.pack_start(hbox, False)
+        except:
+            pass
+        
+        
         if wik != u'':
             t = wik.split('\n')
-            piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
+            print t[0:6]
+            #piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
+            table = gtk.Table(1, 2)
+            table.set_col_spacing(0, 5)
+            table.show()
+            self.vbox8.pack_start(table, False)
+            i = 0
+            h1 = []
+            j = 0
             for x in t:
+                #print 'j = ',
+                #print j
+                #j = j+1
                 if x.startswith('#'):
-                    sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
+                    #print sub_str
+                    #sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
+                    #h1.append(x.lstrip('#'))
+                    #print x.lstrip('#')
+                    #sub_str = ''
+                    #sub_sub_str = ''
+                    #sub_sub_str = ''
+                    eventb = gtk.EventBox()
+                    eventb.set_visible_window(True)
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.show()
+                    main_label = gtk.Label()
+                    main_label.set_markup('<b>'+x.lstrip('#')+'</b>')
+                    main_label.set_alignment(0.1, 0)
+                    main_label.show()
+                    table.attach(main_label, 0, 1, i, i+1, xoptions=gtk.FILL)
+                    main_frame = gtk.Frame()
+                    main_frame.show()
+                    main_vbox = gtk.VBox()
+                    main_vbox.show()
+                    main_frame.add(main_vbox)
+                    sub_vbox = gtk.VBox()
+                    sub_vbox.show()
+                    main_vbox.pack_start(sub_vbox, False)
+                    label = gtk.Label(' ')
+                    label.show()
+                    label.set_alignment(0, 0.5)
+                    #label.set_line_wrap(True)
+                    eventb.add(label)
+                    sub_vbox.pack_start(eventb, False)
+                    table.attach(main_frame, 1, 2, i, i+1)
+                    table.set_row_spacing(i, 10)
+                    table.set_col_spacing(0, 5)
+                    i = i + 1
                 elif not x.startswith('\t') and not x.startswith('#') and not x.startswith('\t#'):
-                    self.details_treestore.append(sub_iter, [x])
+                    #print 'hi'
+                    #self.details_treestore.append(sub_iter, [x])
+                    s = label.get_text()
+                    if x == u'':
+                        label.set_text( s + '\n' + x)
+                    else:
+                        label.set_text(s + x)
+                    #print label.get_text()
+                    #label.show()
                 elif x.startswith('\t#'):
-                    sub_sub_iter = self.details_treestore.append(sub_iter, ['<b>'+x.lstrip('\t#')+'</b>'])
+                    #print sub_str
+                    #sub_sub_iter = self.details_treestore.append(sub_iter, ['<b>'+x.lstrip('\t#')+'</b>'])
+                    #print x.lstrip('\t#')
+                    #sub_sub_str = ''
+                    #pass
+                    eventb = gtk.EventBox()
+                    eventb.set_visible_window(True)
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.show()
+                    sub_sub_vbox = gtk.VBox()
+                    sub_sub_vbox.show()
+                    hbox = gtk.HBox()
+                    hbox.show()
+                    sub_sub_label = gtk.Label('\t')
+                    sub_sub_label.show()
+                    hbox.pack_start(sub_sub_vbox, False)
+                    sub_sub_vbox.pack_start(sub_sub_label, False)
+                    sub_sub_frame = gtk.Frame(x.lstrip('\t#'))
+                    
+                    label = sub_sub_frame.get_label_widget()
+                    label.set_markup('<b>'+x.lstrip('\t#')+'</b>')
+                    sub_sub_frame.set_label_widget(label)
+                    sub_sub_frame.show()
+                    sub_label = gtk.Label('')
+                    sub_label.show()
+                    sub_sub_sub_vbox = gtk.VBox()
+                    sub_sub_sub_vbox.show()
+                    sub_sub_frame.add(sub_sub_sub_vbox)
+                    eventb.add(sub_label)
+                    sub_label.set_alignment(0,0.5)
+                    sub_label.set_use_markup(True)
+                    
+                    sub_sub_sub_vbox.pack_start(eventb, False)
+                    hbox.pack_start(sub_sub_frame)
+                    sub_vbox.pack_start(hbox, False)
+                    
                 elif x.startswith('\t') and not x.startswith('\t#') and not x.startswith('\t\t'):
-                    self.details_treestore.append(sub_sub_iter, [x.lstrip('\t')])
+                    #self.details_treestore.append(sub_sub_iter, [x.lstrip('\t')])
+                    #sub_sub_str = sub_sub_str + x.lstrip('\t')
+                    if sub_label.get_use_markup() == False:
+                        sub_label.set_use_markup(True)
+                    if x == '\t':
+                        sub_label.set_label(sub_label.get_text() + '\n' + x)
+                    else:
+                        x = x.lstrip('\t')
+                        if len(x)>1:
+                            x.lstrip()
+                            print x[0:2]
+                            if x[0].isdigit():
+                                sub_label.set_label(sub_label.get_label()+'<b>'+x[0:2]+'</b>'+x[2:len(x)])
+                            else:
+                                sub_label.set_label(sub_label.get_label()+x)
+                    
+                    pass
                 elif x.startswith('\t\t#'):
-                    print x.split('#')
-                    sub_sub_sub_iter = self.details_treestore.append(sub_sub_iter, ['<b>'+x.lstrip('\t\t#')+'</b>'])
+                    #print x.split('#')
+                    #sub_sub_sub_iter = self.details_treestore.append(sub_sub_iter, ['<b>'+x.lstrip('\t\t#')+'</b>'])
+                    eventb = gtk.EventBox()
+                    eventb.set_visible_window(True)
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.show()
+                    sub_sub_sub_frame = gtk.Frame(x.lstrip('\t\t#'))
+                    sub_sub_sub_frame.show()
+                    sub_sub_sub_sub_vbox = gtk.VBox()
+                    sub_sub_sub_sub_vbox.show()
+                    sub_sub_sub_vbox.pack_start(sub_sub_sub_frame, False)
+                    sub_sub_sub_frame.add(sub_sub_sub_sub_vbox)
+                    sub_sub_label = gtk.Label(' ')
+                    sub_sub_label.set_alignment(0,0.5)
+                    eventb.add(sub_sub_label)
+                    sub_sub_label.show()
+                    sub_sub_sub_sub_vbox.pack_start(eventb, False)
+                    #sub_sub_vbox.pack_start(sub_sub_sub_frame, False)
+                    
+                                        
                 elif x.startswith('\t\t') and not x.startswith('\t\t#'):
+                    
                     #print x
+                    '''
                     if x.strip('\t\t') != '':
                         if x.find('terms derived from')>=0:
                             self.details_treestore.append(sub_sub_sub_iter, ['<u><i>'+ x.lstrip('\t\t')+'</i></u>'])
                         else:
-                            self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])
-        #print self.details_cell.get_property('is-expander')
-        self.details_treeview.expand_all()
+                            self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])'''
+                    if x.strip('\t\t') !='':
+                        if x.find('terms derived from')>=0:
+                            sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
+                        else:
+                            sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
+                            
+
     def on_delete_clicked(self, widget=None, event=None):
         if self.tree_value in wordz_db.list_groups():
             wordz_db.delete_group(self.tree_value)
@@ -1251,6 +1485,6 @@ if __name__ == "__main__":
     wordz_db.db_init()
     win = wordzGui()
     win.window.show()
-    th = get_details()
+    th = get_def_thread()
     gtk.gdk.threads_init()
     gtk.main()

@@ -9,11 +9,11 @@ import re
 
 class get_wiki_data:
     def __init__(self, filename):
-        self.f = open(filename, 'r')
-        #self.s = filename
-        self.s = self.f.read()
+        #self.f = open(filename, 'r')
+        self.s = filename
+        #self.s = self.f.read()
         self.sections = self.s.split('\n## ')
-        self.pos = ['Noun', 'Verb', 'Pronoun', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Interjection', 'Antonyms', 'Synonyms', 'Derived terms']
+        self.pos = ['Noun', 'Verb', 'Pronoun', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Interjection', 'Antonyms', 'Synonyms', 'Derived terms', 'Etymology', 'Pronunciation']
 
     def get_contents(self):
         for i in self.sections:
@@ -67,12 +67,6 @@ class get_wiki_data:
                             i.remove(j)
                     i = '\n'.join(i)
                     self.dict[key][index] = i
-
-        for i in self.dict[u'Derived terms']:
-            index = self.dict[u'Derived terms'].index(i)
-            i = i.replace('\n\n', '\n')
-            self.dict[u'Derived terms'][index] = i
-            
             #print self.dict[key]
 
     def show(self, key):
@@ -181,21 +175,23 @@ class get_wiki_data:
                             self.dict[key].remove(self.dict[key][0])
                 
         return s
-def main(txt_html):
-    g = get_wiki_data(txt_html)
+
+def main(html):
+    g = get_wiki_data(html)
     g.get_contents()
     g.get_eng_fields()
     g.get_field_details()
     data = g.save_str()
     return data
 
-
 if __name__ == '__main__':
-    g = get_wiki_data('tmp.bak')
+    file = open('tmp.bak', 'r')
+    html = file.read()
+    g = get_wiki_data(html)
     g.get_contents()
     g.get_eng_fields()
     g.get_field_details()
-    g.save_str()
+    print g.save_str()
 
 
 
