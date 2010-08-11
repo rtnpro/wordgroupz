@@ -149,7 +149,7 @@ class wordGroupzSql:
                 t = (grp,detail,wn, '', '')
             else:
                 wn = wordnet.get_definition(grp)
-                t = (grp,'', wn)
+                t = (grp,'', wn, '', '')
             c.execute("""insert into groups values (?,?,?,?,?)""",t)
             conn.commit()
         #allow words with no groups to be added
@@ -210,7 +210,7 @@ class wordGroupzSql:
     def get_details_for_flashcard(self):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
-        c.execute("""select word, details from word_groups order by word""")
+        c.execute("""select word, wordnet from word_groups order by word""")
         data = c.fetchall()
         c.close()
         conn.close()

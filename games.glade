@@ -658,7 +658,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label9">
+                      <object class="GtkLabel" id="label19">
                         <property name="visible">True</property>
                       </object>
                       <packing>
@@ -707,7 +707,93 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkHBox" id="hbox7">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkHBox" id="hbox14">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkImage" id="image9">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-info</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label9">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox15">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkImage" id="image10">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-apply</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label17">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox16">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkImage" id="image11">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-close</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label18">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
               </object>
               <packing>
