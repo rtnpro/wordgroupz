@@ -15,13 +15,16 @@ class games_GUI:
         self.flash_data = db.get_details_for_flashcard()
         self.flash_frame = self.builder.get_object('frame5')
         self.flash_label = self.builder.get_object('label24')
-        #self.eventbox5 = self.builder.get_object('eventbox5')
-        #self.eventbox5.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
-        self.eventbox6 = self.builder.get_object('eventbox6')
-        self.eventbox6.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#F4F2EE'))
-        self.eventbox7 = self.builder.get_object('eventbox7')
-        self.eventbox7.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))#("#DBC2C0"))
-        self.flash_frame.set_label('word')
+        self.eventbox4 = self.builder.get_object('eventbox4')
+        self.eventbox4.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#444444"))
+        #self.eventbox6 = self.builder.get_object('eventbox6')
+        #self.eventbox6.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#F4F2EE'))
+        self.eventbox10 = self.builder.get_object('eventbox10')
+        self.eventbox10.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+        label=self.flash_frame.get_label_widget()
+        label.set_text('word')
+        label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+        self.flash_frame.set_label_widget(label)
         self.current_index = 0
         self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
         self.check = self.builder.get_object('check')
@@ -153,8 +156,8 @@ class games_GUI:
             #print '###mcq_count ',
             if self.res[0] != '':
                 #print 'Hello'
-                print self.res
-                print self.question.get_text()
+                #print self.res
+                #print self.question.get_text()
                 #print 'HI'
                 ans_index = self.ques[self.question.get_text()].index(self.ans[self.mcq_count][0])
                 #print self.res[1]
@@ -162,7 +165,7 @@ class games_GUI:
                 self.response.append(self.res)
                 #print self.response
                 if self.response[self.mcq_count][0]==self.ans[self.mcq_count][0]:
-                    print 'Correct'
+                    #print 'Correct'
                     self.mcq_correct = self.mcq_correct + 1
                     #print self.mcq_correct
                     self.accuracy[self.ques.keys()[self.mcq_count]][0] = self.accuracy[self.ques.keys()[self.mcq_count]][0] + 1
@@ -170,7 +173,7 @@ class games_GUI:
                     self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_APPLY)]
                     
                 else:
-                    print 'wrong'
+                    #print 'wrong'
                     self.mcq_incorrect = self.mcq_incorrect +1
                     #print self.mcq_incorrect
                     self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
@@ -222,7 +225,7 @@ class games_GUI:
         self.builder.get_object('label18').set_text(str(self.mcq_incorrect))
         self.proceed_b.set_sensitive(False)
         self.res = ['',-1]
-        print self.review_data
+        #print self.review_data
         
     def on_review_clicked(self, widget=None, event=None):
         self.review_window = gtk.Window()
@@ -230,7 +233,7 @@ class games_GUI:
         list_tree = ['Q.No.','Question','Answer','Response', 'Result']
         list_store = gtk.ListStore(str,str,str,str,str)
         for row in self.review_data:
-            print len(row)
+            #print len(row)
             list_store.append(row)
         review_tree = gtk.TreeView(list_store)
         cell = gtk.CellRendererText()
@@ -290,12 +293,13 @@ class games_GUI:
     def get_mcq_data(self):
         d = {}
         for i in self.flash_data:
-            l = []
-            t = i[1].split('\n')
-            for x in t:
-                if x.startswith('\t') and not x.startswith('\tSynonyms:'):
-                    l.append(x.lstrip('\t')[2:len(x.lstrip('\t'))])
-            d[i[0]]=l
+            if i[1]!= u'':
+                l = []
+                t = i[1].split('\n')
+                for x in t:
+                    if x.startswith('\t') and not x.startswith('\tSynonyms:'):
+                        l.append(x.lstrip('\t')[2:len(x.lstrip('\t'))])
+                d[i[0]]=l
         return d
     def on_random_clicked(self, widget=None, event=None):
         if self.current_index < len(self.flash_data)-2:
@@ -329,11 +333,17 @@ class games_GUI:
                 #print self.mode
         if self.mode == 'definition':
             #print self.mode
-            self.flash_frame.set_label('definition')
+            label=self.flash_frame.get_label_widget()
+            label.set_text('definition')
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+            self.flash_frame.set_label_widget(label)
             self.flash_label.set_text(self.flash_data[self.current_index][1])
             self.flash_label.set_alignment(0.1, 0.1)
         elif self.mode == 'word':
-            self.flash_frame.set_label('word')
+            label=self.flash_frame.get_label_widget()
+            label.set_text('word')
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+            self.flash_frame.set_label_widget(label)
             self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             self.flash_label.set_alignment(0.5, 0.5)
     def on_games_destroy(self, widget=None, event=None):
@@ -341,12 +351,18 @@ class games_GUI:
 
     def on_check_clicked(self, widget=None, event=None):
         if self.flash_frame.get_label() == 'word':
-            self.flash_frame.set_label('definition')
+            label=self.flash_frame.get_label_widget()
+            label.set_text('definition')
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+            self.flash_frame.set_label_widget(label)
             self.flash_label.set_alignment(0.1,0.1)
             self.flash_label.set_text(self.flash_data[self.current_index][1])
 
         else:
-            self.flash_frame.set_label('word')
+            label=self.flash_frame.get_label_widget()
+            label.set_text('word')
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+            self.flash_frame.set_label_widget(label)
             self.flash_label.set_alignment(0.5,0.5)
             self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             
@@ -355,11 +371,18 @@ class games_GUI:
         if self.current_index <= (self.total_count - 2):
             self.current_index = self.current_index + 1
             if self.mode == 'word':
-                self.flash_frame.set_label('word')
+                label = self.flash_frame.get_label_widget()
+                label.set_text('word')
+                label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+                self.flash_frame.set_label_widget(label)
                 self.flash_label.set_alignment(0.5,0.5)
                 self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             elif self.mode == 'definition':
-                self.flash_frame.set_label('definition')
+                label = self.flash_frame.get_label_widget()
+                label.set_text('definition')
+                label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+                self.flash_frame.set_label_widget(label)
+
                 self.flash_label.set_text(self.flash_data[self.current_index][1])
                 self.flash_label.set_alignment(0.1, 0.1)
                 self.flash_label.set_max_width_chars(50)

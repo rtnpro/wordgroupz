@@ -36,22 +36,34 @@ import thread
 import threading
 import games
 import espeak
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar
+
+def threaded(f):
+    def wrapper(*args):
+        t = threading.Thread(target=f, args = args)
+        t.start()
+    return wrapper
 
 class get_def_thread(threading.Thread):
     stopthread = threading.Event()
     def run(self):
+        print 'searching webster'
         word = win.tree_value
-        dic = win.chose_dict.get_active_text()
+        #dic = win.chose_dict.get_active_text()
         #print dic
-        if dic == 'webster':
+        #if dic == 'webster':
             #print wordz_db.check_ws(win.tree_value)
-            if wordz_db.check_ws(win.tree_value):
-                defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
-            else:
-                d = online_dict()
-                defs = d.get_def(word)
-                wordz_db.save_webster(win.tree_value, defs)
-            defs = '\n' + "webster:\n" + defs + '\n'
+        dic = 'webster'
+        if wordz_db.check_ws(win.tree_value):
+            defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
+        else:
+            d = online_dict()
+            defs = d.get_def(word)
+            wordz_db.save_webster(win.tree_value, defs)
+        defs = '\n' + "webster:\n" + defs + '\n'
+        """
         elif dic == 'wordnet':
             if wordz_db.check_wn(win.tree_value):
                 defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
@@ -68,8 +80,13 @@ class get_def_thread(threading.Thread):
         buff = win.output_txtview.get_buffer()
         end = buff.get_iter_at_offset(-1)
         buff.place_cursor(end)
-        buff.insert_interactive_at_cursor(defs, True)
-
+        buff.insert_interactive_at_cursor(defs, True)"""
+        label = win.builder.get_object('label13')
+        label.set_text(defs)
+    def stop(self):
+        self._stop.set()
+    def stopped(self):
+        return self._stop.isSet()
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
@@ -173,7 +190,7 @@ class wordGroupzSql:
                 grp = 'no-category'
             wn = wordnet.get_definition(word)
             #print wn
-            t = (word, grp, detail, wn, '', '', 0)
+            t = (word, grp, detail, wn, '', '', '0:0')
             c.execute('''insert into word_groups
                 values(?,?,?,?,?,?,?)''', t)
             conn.commit()
@@ -692,6 +709,7 @@ class wordzGui:
         self.selection.connect('changed', self.tree_select_changed)
         self.treeview.set_tooltip_text("Shows words classified in groups")
         self.treeview.show()
+        self.treeview.expand_all()
         self.scrolledwindow2 = self.builder.get_object("scrolledwindow2")
         self.scrolledwindow2.add_with_viewport(self.treeview)
         
@@ -1014,6 +1032,7 @@ class wordzGui:
         #print wiki_txt
         wordz_db.save_wiktionary(self.tree_value, wiki_txt)
         #print wordz_db.get_dict_data('wiktionary', self.tree_value)
+        self.show_details_tree()
 
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):
@@ -1073,12 +1092,16 @@ class wordzGui:
         search_txt = self.search.get_text()
         words = list
         self.treestore.clear()
+        if search_txt == '':
+            self.on_back_clicked()
+            return
         for group in wordz_db.list_groups():
             for i in wordz_db.list_words_per_group(group):
                 if i.startswith(search_txt):
-                    piter = self.treestore.append(None, [group])
-                    for word in wordz_db.list_words_per_group(group):
-                        self.treestore.append(piter, [word])
+                    piter = self.treestore.append(None, [i])
+                
+                    #for word in wordz_db.list_words_per_group(group):
+                    #    self.treestore.append(piter, [word])
 
     def tree_select_changed(self, widget=None, event=None):
         self.model, self.iter = self.selection.get_selected()
@@ -1090,12 +1113,12 @@ class wordzGui:
             #print self.tree_value
             self.selected_word.show()
             self.selected_word.set_text(self.tree_value)
-            self.notebook1 = self.builder.get_object('notebook1')
-            cur_page = self.notebook1.get_current_page()
+            self.notebook2 = self.builder.get_object('notebook2')
+            cur_page = self.notebook2.get_current_page()
             if cur_page is 1:
                 #self.url = ('http://en.wiktionary.org/wiki/'+self.tree_value)
                 #self.browser.open(self.url)
-                #self.on_lookup_wiki_clicked()
+                self.on_lookup_wiki_clicked()
                 #self.get_audio()
                 pass
 
@@ -1379,7 +1402,17 @@ class wordzGui:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
                         else:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
-                            
+
+        if ws != u'':
+            self.builder.get_object('look_webster').set_sensitive(False)
+            label = self.builder.get_object('label13')
+            label.set_alignment(0.10, 0.10)
+            label.set_text(ws)
+        else:
+            self.builder.get_object('look_webster').set_sensitive(True)
+            label = self.builder.get_object('label13')
+            label.set_alignment(0.10, 0.10)
+            label.set_text('Webster definition not in database,\nPlease click on "Look up"')
 
     def on_delete_clicked(self, widget=None, event=None):
         if self.tree_value in wordz_db.list_groups():
@@ -1460,13 +1493,14 @@ class wordzGui:
         dialog.destroy()
 
 
-    def on_back_clicked(self, widget, data=None):
+    def on_back_clicked(self, widget=None, data=None):
         self.treestore.clear()
         self.search.set_text('')
         for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
+        self.treeview.expand_all()
         buff = self.output_txtview.get_buffer()
         buff.set_text('Nothing selected')
         self.output_txtview.set_buffer(buff)
@@ -1489,7 +1523,7 @@ class wordzGui:
         
             
 
-    def on_get_details1_clicked(self, widget, data=None):
+    #def on_get_details1_clicked(self, widget, data=None):
         #thread.start_new_thread(self.on_get_details1_clicked,(self,''))
         """word = self.tree_value
         dic = self.chose_dict.get_active_text()
@@ -1520,8 +1554,93 @@ class wordzGui:
         end = buff.get_iter_at_offset(-1)
         buff.place_cursor(end)
         buff.insert_interactive_at_cursor(defs, True)"""
-        th.start()
+    def on_lookup_webster_clicked(self, widget=None, event=None):
+        threading.Thread(target=self._startthread).start()
 
+    def _startthread(self):
+        print 'searching webster'
+        self.builder.get_object('look_webster').set_sensitive(False)
+        label = self.builder.get_object('label13')
+        label.set_text('Searching...')
+        word = self.tree_value
+        dic = 'webster'
+        if wordz_db.check_ws(win.tree_value):
+            defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
+        else:
+            
+            d = online_dict()
+            defs = d.get_def(word)
+            
+            wordz_db.save_webster(win.tree_value, defs)
+        defs = '\n' + "webster:\n" + defs + '\n'
+        print defs
+        label.set_text(defs.encode('utf-8'))
+        self.builder.get_object('look_webster').set_sensitive(True)
+
+    def on_show_stats_clicked(self, widget=None, event=None):
+        conn = sqlite3.connect('/home/rtnpro/.wordgroupz/wordz')
+        c = conn.cursor()
+        c.execute("""select word, accuracy from word_groups""")
+        l = c.fetchall()
+        print l
+        c.close()
+        conn.close()
+
+
+        N = len(l)
+        words = ()
+        val = ()
+        err = ()
+        for i in l:
+            words = words + (i[0],)
+            t = i[1].split(':')
+            if i[1]=='0'or i[1]== '0:0':
+                h = 0.0
+            else:
+                h = (float(t[0])/float(t[1]))*100
+            val = val + (h,)
+            err = err + (0,)
+
+        print words, val, err
+
+        #menStd =   (2, 3, 4, 1, 2)
+
+        ind = np.arange(N)  # the x locations for the groups
+        width = 0.20       # the width of the bars
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        rects1 = ax.bar(ind, val, width, color='g')
+
+        #womenMeans = (25, 32, 34, 20, 25)
+        #womenStd =   (3, 5, 2, 3, 3)
+        #rects2 = ax.bar(ind+width, womenMeans, width, color='y', yerr=womenStd)
+
+        # add some
+        ax.set_ylabel('Accuracy')
+        ax.set_title('Accuracy for words')
+        ax.set_xticks(ind+width)
+        ax.set_xticklabels( words )
+
+        def autolabel(rects):
+            # attach some text labels
+            for rect in rects:
+                height = rect.get_height()
+                ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, '%d'%int(height),
+                        ha='center', va='bottom')
+        canvas = FigureCanvasGTK(fig)
+        canvas.show()
+        autolabel(rects1)
+        graphwin = gtk.Window()
+        scroller = gtk.ScrolledWindow()
+        scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        vbox = gtk.VBox()
+        vbox.show()
+        #scroller.add_with_viewport(canvas)
+        #vbox.pack_start(scroller)
+        canvas.show()
+        graphwin.add(canvas)
+        graphwin.show_all()
 if __name__ == "__main__":
     wordz_db=wordGroupzSql()
     wordz_db.db_init()
