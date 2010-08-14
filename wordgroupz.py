@@ -35,6 +35,7 @@ import get_fields
 import thread
 import threading
 import games
+import espeak
 
 class get_def_thread(threading.Thread):
     stopthread = threading.Event()
@@ -43,7 +44,7 @@ class get_def_thread(threading.Thread):
         dic = win.chose_dict.get_active_text()
         #print dic
         if dic == 'webster':
-            print wordz_db.check_ws(win.tree_value)
+            #print wordz_db.check_ws(win.tree_value)
             if wordz_db.check_ws(win.tree_value):
                 defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
             else:
@@ -58,7 +59,7 @@ class get_def_thread(threading.Thread):
                 defs = wordnet.get_definition(word)
             defs = '\n' + 'wordnet:\n' + defs + '\n'
         elif dic == 'wiktionary':
-            print  wordz_db.check_wik(win.tree_value)
+            #print  wordz_db.check_wik(win.tree_value)
             if wordz_db.check_wik(win.tree_value):
                 defs = wordz_db.get_dict_data(dic, win.tree_value)[0].strip("'").strip('"')
                 defs = '\n' + 'wiktionary:\n'+defs + '\n'
@@ -171,7 +172,7 @@ class wordGroupzSql:
             if grp == '':
                 grp = 'no-category'
             wn = wordnet.get_definition(word)
-            print wn
+            #print wn
             t = (word, grp, detail, wn, '', '', 0)
             c.execute('''insert into word_groups
                 values(?,?,?,?,?,?,?)''', t)
@@ -493,7 +494,7 @@ class online_dict:
         for db, word in l:
             defs = self.definition(word, db=db)
             if defs == []:
-                print >> sys.stderr, 'no-match'
+                #print >> sys.stderr, 'no-match'
                 return 2
             db, dbdescr, defstr = defs[0]
             s = '\n\n\n'.join([defstr for _, _, defstr in defs])
@@ -566,10 +567,10 @@ class get_wiki_data:
 
     def show(self, key):
         if key in self.dict.keys():
-            print key+':'
+            #print key+':'
             count = 1
             for i in self.dict[key]:
-                print '\t'+ str(count)+'. '+i
+                #print '\t'+ str(count)+'. '+i
                 count = count + 1
     def get_field_details(self):
         self.dict = {}
@@ -586,7 +587,7 @@ class get_wiki_data:
             #count = count + 19
             '''
             i = i.split('[')
-            print i[3]+'^s'
+            #print i[3]+'^s'
             for j in i:
                 if j.find(']')>=0:
                     t = j.find(']')
@@ -606,13 +607,13 @@ class get_wiki_data:
             #print i
             '''print i
             links = re.findall('\[.*?\]', i)
-            print links
+            #print links
             for link in links:
                 if link.strip('[').strip(']').isdigit:
                     i = i.replace(link, '')
                 else:
                     i = i.replace(link, link.strip('[').strip(']'))
-                    print i'''
+                    #print i'''
 
             t = i.split('\n')
             if t[0].find('Etymology')>= 0:
@@ -852,6 +853,9 @@ class wordzGui:
             self.player.set_state(gst.STATE_PLAYING)
         else:
             self.player.set_state(gst.STATE_NULL)
+            word = self.tree_value
+            espeak_obj = espeak.espeak()
+            espeak_obj.speak(word)
 
     def on_message(self, bus, message):
         t = message.type
@@ -860,11 +864,12 @@ class wordzGui:
         elif t == gst.MESSAGE_ERROR:
             self.player.set_state(gst.STATE_NULL)
             err, debug = message.parse_error()
-            print "Error: %s" % err, debug
+            #print "Error: %s" % err, debug
 
 
     def hello(self,widget=None, event=None):
-        print 'hello'
+        #print 'hello'
+        pass
         
     def look_for_audio(self):
         page = self.browser.get_html()
@@ -872,7 +877,8 @@ class wordzGui:
         soup = BeautifulSoup('<html>'+str(page)+'</html>')
         div = soup.html.body.findAll('div', attrs={'id':'ogg_player_1'})
         if div is None:
-            print "No audio available"
+            #print "No audio available"
+            pass
             
         else:    
             l = str(div).split(',')
@@ -881,7 +887,7 @@ class wordzGui:
                     self.download_url = i.split(': ')[1].strip('"')
                     #print self.download_url
                     self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
-                    print "wiki_word" + self.wiki_word
+                    #print "wiki_word" + self.wiki_word
                     self.save_audio.set_sensitive(True)
                     self.audio_file = self.wiki_word+'.ogg'
                     #print self.audio_file
@@ -906,7 +912,7 @@ class wordzGui:
     def _navigation_requested_cb(self, view, frame, networkRequest):
         uri = networkRequest.get_uri()
         if uri == self.url:
-            print "request to go to %s" % uri
+            #print "request to go to %s" % uri
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
             page = opener.open(uri).read()
@@ -917,7 +923,7 @@ class wordzGui:
             #extract contents
             for i in soup.html.body.findAll('div', {'id' : 'content'}):
                 contents = i
-            print contents
+            #print contents
             soup.find(href='http://bits.wikimedia.org/skins-1.5/monobook/main.css?283l').replaceWith('<link rel="stylesheet" href="http://rtnpro.fedorapeople.org/main.css" type="text/css" media="screen" />')
             head = soup.html.head
             tmp = '<html>' + '\n' + str(head) + '\n' + '<body>\n' + str(contents) + '\n</body>' + '</html>'
@@ -963,10 +969,10 @@ class wordzGui:
 
         #extract contents
         div = soup.findAll('div', attrs={'id':'ogg_player_1'})
-        print div
+        #print div
         self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
         if div is None:
-            print "No audio available"
+            #print "No audio available"
             self.word_audio_found = False
         else:
             #print 'hi'
@@ -974,9 +980,9 @@ class wordzGui:
             for i in l:
                 if i.find('videoUrl')>0:
                     self.download_url = i.split(': ')[1].strip('"')
-                    print self.download_url
+                    #print self.download_url
                     self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
-                    print 'wiki_word'+self.wiki_word
+                    #print 'wiki_word'+self.wiki_word
                     self.save_audio.set_sensitive(True)
                     self.audio_file = self.tree_value+'.ogg'
                     self.audio_found = True
@@ -1005,9 +1011,9 @@ class wordzGui:
         #print g.dict.keys()
         #print txt_html
         wiki_txt = get_fields.main(txt_html)
-        print wiki_txt
+        #print wiki_txt
         wordz_db.save_wiktionary(self.tree_value, wiki_txt)
-        print wordz_db.get_dict_data('wiktionary', self.tree_value)
+        #print wordz_db.get_dict_data('wiktionary', self.tree_value)
 
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):
@@ -1043,7 +1049,7 @@ class wordzGui:
     """
     def on_notebook1_change_current_page(self, widget=None, event=None):
         notebook1 = self.builder.get_object('notebook1')
-        print notebook1.get_current_page()"""
+        #print notebook1.get_current_page()"""
     """
     def on_notebook1_switch_page(self, notebook, page, page_num):
         #print 'page switched'
@@ -1133,7 +1139,7 @@ class wordzGui:
             pass
         try:
             wik = wordz_db.get_dict_data('wiktionary', self.tree_value)[0].strip("'")
-            print "wiktionary"+ wik
+            #print "wiktionary"+ wik
         except:
             pass
         
@@ -1225,7 +1231,7 @@ class wordzGui:
         
         if wik != u'':
             t = wik.split('\n')
-            print t[0:6]
+            #print t[0:6]
             #piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
             table = gtk.Table(1, 2)
             table.set_col_spacing(0, 5)
@@ -1331,7 +1337,7 @@ class wordzGui:
                         x = x.lstrip('\t')
                         if len(x)>1:
                             x.lstrip()
-                            print x[0:2]
+                            #print x[0:2]
                             if x[0].isdigit():
                                 sub_label.set_label(sub_label.get_label()+'<b>'+x[0:2]+'</b>'+x[2:len(x)])
                             else:
@@ -1489,7 +1495,7 @@ class wordzGui:
         dic = self.chose_dict.get_active_text()
         #print dic
         if dic == 'webster':
-            print wordz_db.check_ws(self.tree_value)
+            #print wordz_db.check_ws(self.tree_value)
             if wordz_db.check_ws(self.tree_value):
                 defs = wordz_db.get_dict_data(dic, self.tree_value)[0]
             else:
@@ -1504,7 +1510,7 @@ class wordzGui:
                 defs = wordnet.get_definition(word)
             defs = '\n' + 'wordnet:\n' + defs + '\n'
         elif dic == 'wiktionary':
-            print  wordz_db.check_wik(self.tree_value)
+            #print  wordz_db.check_wik(self.tree_value)
             if wordz_db.check_wik(self.tree_value):
                 defs = wordz_db.get_dict_data(dic, self.tree_value)[0].strip("'").strip('"')
                 defs = '\n' + 'wiktionary:\n'+defs + '\n'

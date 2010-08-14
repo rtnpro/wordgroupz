@@ -5,6 +5,7 @@ import gtk
 import wordgroupz
 import random
 
+
 class games_GUI:
     def __init__(self):
         self.builder = gtk.Builder()
@@ -388,7 +389,6 @@ class games_GUI:
 
     def on_window_destroy(self, widget=None, event=None):
         gtk.main_quit()
-        wordgroupz.win.window.show()
 def flash():
     global db
     db = wordgroupz.wordGroupzSql()
