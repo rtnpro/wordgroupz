@@ -34,6 +34,7 @@ from html2text import *
 import get_fields
 import thread
 import threading
+import games
 
 class get_def_thread(threading.Thread):
     stopthread = threading.Event()
@@ -85,7 +86,7 @@ class wordGroupzSql:
             tables.append(x[0])
         if not 'word_groups' in tables:
             c.execute('''create table word_groups
-            (word text, grp text, details text, wordnet text, webster text, wiktionary text)''')
+            (word text, grp text, details text, wordnet text, webster text, wiktionary text, accuracy text)''')
             conn.commit()
         if not 'groups' in tables:
            c.execute('''create table groups
@@ -107,10 +108,21 @@ class wordGroupzSql:
         for i in ['wordnet', 'webster', 'wiktionary']:
             if not i in word_groups_cols:
                 c.execute("""alter table word_groups add column %s text"""%(i))
+        if not 'accuracy' in word_groups_cols:
+            c.execute("""alter table word_groups add column accuracy text""")
+            c.execute("""update word_groups set accuracy='0:0'""")
+        
         conn.commit()
         c.close()
         conn.close()
-
+    def save_accuracy_for_word(self, w, val):
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        t = (w,)
+        c.execute("""update word_groups set accuracy='%s' where word=?"""%(val),t)
+        conn.commit()
+        c.close()
+    
     def list_groups(self):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
@@ -160,9 +172,9 @@ class wordGroupzSql:
                 grp = 'no-category'
             wn = wordnet.get_definition(word)
             print wn
-            t = (word, grp, detail, wn, '', '')
+            t = (word, grp, detail, wn, '', '', 0)
             c.execute('''insert into word_groups
-                values(?,?,?,?,?,?)''', t)
+                values(?,?,?,?,?,?,?)''', t)
             conn.commit()
         c.close()
 
@@ -210,7 +222,7 @@ class wordGroupzSql:
     def get_details_for_flashcard(self):
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
-        c.execute("""select word, wordnet from word_groups order by word""")
+        c.execute("""select word, wordnet, accuracy from word_groups order by word""")
         data = c.fetchall()
         c.close()
         conn.close()
@@ -683,7 +695,7 @@ class wordzGui:
         self.scrolledwindow2.add_with_viewport(self.treeview)
         
         self.search=self.builder.get_object("search")
-        self.search.connect('changed',self.on_search_changed)
+        #self.search.connect('changed',self.on_search_changed)
         
         self.chose_dict_hbox = self.builder.get_object('hbox7')
         vseparator = gtk.VSeparator()
@@ -766,6 +778,16 @@ class wordzGui:
         '''self.file_item = gtk.MenuItem('_File')
         self.dict_item = gtk.MenuItem('_Dictionary')
         self.help_item = gtk.MenuItem('_Help')'''
+        self.menubar = self.builder.get_object('menubar1')
+        self.game_item = gtk.MenuItem('_Games')
+        self.game_item.show()
+        self.game_item_sub = gtk.Menu()
+        self.flash_card = gtk.MenuItem('_Flash Card')
+        self.mcq = gtk.MenuItem('_MCQ')
+        self.game_item_sub.append(self.flash_card)
+        self.game_item_sub.append(self.mcq)
+        self.game_item_sub.show_all()
+        self.menubar.insert(self.game_item, 1)
         self.file_item = self.builder.get_object('file_item')
         self.help_item = self.builder.get_object('help_item')
         self.file_item_sub = gtk.Menu()
@@ -776,10 +798,12 @@ class wordzGui:
         self.about = gtk.MenuItem('_About')
         self.about.show()
         self.help_item_sub.append(self.about)
-
+        self.game_item.set_submenu(self.game_item_sub)
         self.file_item.set_submenu(self.file_item_sub)
         self.help_item.set_submenu(self.help_item_sub)
 
+        self.flash_card.connect('activate', self.on_flash_card_clicked)
+        self.mcq.connect('activate', self.on_mcq_clicked)
         self.about.connect('activate', self.on_about_clicked)
         self.quit.connect('activate', self.on_MainWindow_destroy)
 
@@ -808,7 +832,18 @@ class wordzGui:
         self.vbox12 = self.builder.get_object('vbox12')
         self.vbox8 = self.builder.get_object('vbox8')
         #self.vbox12.set_spacing(10)
+    
+    def on_flash_card_clicked(self, widget=None, event=None):
+        self.window.hide()
+        game = games.flash()
+        #game.g.builder.get_object('window2').show()
+        self.window.show()
+        
 
+    def on_mcq_clicked(self, widget=None, event=None):
+        self.window.hide()
+        game = games.mcq()
+        self.window.show()
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
         #print filepath
@@ -1009,7 +1044,7 @@ class wordzGui:
     def on_notebook1_change_current_page(self, widget=None, event=None):
         notebook1 = self.builder.get_object('notebook1')
         print notebook1.get_current_page()"""
-
+    """
     def on_notebook1_switch_page(self, notebook, page, page_num):
         #print 'page switched'
         #print page_num
@@ -1026,17 +1061,18 @@ class wordzGui:
                 #self.on_lookup_wiki_clicked()'''
         elif page_num == 0:
             self.show_details_tree()
-            self.window.resize(min(width, 700), min(height, 550))
+            self.window.resize(min(width, 700), min(height, 550))"""
             
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
         words = list
         self.treestore.clear()
         for group in wordz_db.list_groups():
-            if search_txt in wordz_db.list_words_per_group(group):
-                piter = self.treestore.append(None, [group])
-                for word in wordz_db.list_words_per_group(group):
-                    self.treestore.append(piter, [word])
+            for i in wordz_db.list_words_per_group(group):
+                if i.startswith(search_txt):
+                    piter = self.treestore.append(None, [group])
+                    for word in wordz_db.list_words_per_group(group):
+                        self.treestore.append(piter, [word])
 
     def tree_select_changed(self, widget=None, event=None):
         self.model, self.iter = self.selection.get_selected()

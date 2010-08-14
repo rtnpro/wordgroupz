@@ -12,24 +12,30 @@ class games_GUI:
         self.builder.connect_signals(self)
         self.window = self.builder.get_object('games')
         self.flash_data = db.get_details_for_flashcard()
-        self.flash_frame = self.builder.get_object('frame2')
-        self.flash_label = self.builder.get_object('label13')
+        self.flash_frame = self.builder.get_object('frame5')
+        self.flash_label = self.builder.get_object('label24')
+        #self.eventbox5 = self.builder.get_object('eventbox5')
+        #self.eventbox5.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+        self.eventbox6 = self.builder.get_object('eventbox6')
+        self.eventbox6.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#F4F2EE'))
+        self.eventbox7 = self.builder.get_object('eventbox7')
+        self.eventbox7.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))#("#DBC2C0"))
         self.flash_frame.set_label('word')
         self.current_index = 0
-        self.flash_label.set_text(self.flash_data[self.current_index][0])
+        self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
         self.check = self.builder.get_object('check')
         self.total_count = len(self.flash_data)
         self.count = 0
-        self.total_count_label = self.builder.get_object('label1')
-        self.correct_label = self.builder.get_object('label2')
-        self.incorrect_label = self.builder.get_object('label3')
+        self.total_count_label = self.builder.get_object('label26')
+        self.correct_label = self.builder.get_object('label27')
+        self.incorrect_label = self.builder.get_object('label28')
         self.total_count_label.set_text(str(self.total_count))
-        self.radio_word = self.builder.get_object('byword')
-        self.radio_definition = self.builder.get_object('bydefinition')
-        self.check_random = self.builder.get_object('random')
-        self.button_iknow = self.builder.get_object('iknow')
-        self.button_idunno = self.builder.get_object('idunno')
-        self.button_check = self.builder.get_object('check')
+        self.radio_word = self.builder.get_object('byword1')
+        self.radio_definition = self.builder.get_object('bydefinition1')
+        self.check_random = self.builder.get_object('random1')
+        self.button_iknow = self.builder.get_object('iknow1')
+        self.button_idunno = self.builder.get_object('idunno1')
+        self.button_check = self.builder.get_object('check1')
         #self.check.connect('clicked', self.on_check_clicked)
         self.correct = []
         self.incorrect = []
@@ -45,12 +51,49 @@ class games_GUI:
         self.mcq_dict = self.get_mcq_data()
         #print self.mcq_dict
         self.set_up_mcq()
+        self.builder.get_object('label9').set_text(str(self.total_count))
+        self.proceed_b = self.builder.get_object('proceed')
+        self.proceed_b.set_sensitive(False)
+        #self.builder.get_object('scrolledwindow2').show()
+        self.accuracy = self.get_accuracy_table()
+        #menu - flash games
+        self.game_mode = self.builder.get_object('game_mode')
+        self.game_mode_sub = gtk.Menu()
+        self.game_mode_sub.show()
+        self.by_word = gtk.RadioMenuItem(None, 'word')
+        self.by_word.set_active(True)
+        self.by_word.show()
+        self.by_def = gtk.RadioMenuItem(self.by_word, 'definition')
+        self.by_def.connect('toggled', self.on_radio_toggled)
+        self.by_word.connect('toggled', self.on_radio_toggled)
+        #self.by_word.set_active(True)
+        self.by_def.show()
+        #self.by_def = self.by_definition
+        self.by_random = gtk.CheckMenuItem('_Random')
+        self.by_random.connect('toggled', self.on_random_clicked)
+        self.by_random.show()
+        self.game_mode_sub.append(self.by_word)
+        self.game_mode_sub.append(self.by_def)
+        self.game_mode_sub.append(self.by_random)
+        self.game_mode.set_submenu(self.game_mode_sub)
+        #print self.by_def
+
+        #mcq
+        self.eventbox1 = self.builder.get_object('eventbox1')
+        self.eventbox1.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
+        self.eventbox5 = self.builder.get_object('eventbox5')
+        self.eventbox5.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+        
+        self.eventbox8 = self.builder.get_object('eventbox8')
+        self.eventbox8.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+        self.review_b = self.builder.get_object('review')
+        self.review_data = []
         
     def set_up_mcq(self):
         d = self.mcq_dict.keys()
         random.shuffle(d)
-        print 'd = ',
-        print d
+        #print 'd = ',
+        #print d
         self.ques = {}
         for i in d:
             opts = []
@@ -60,8 +103,8 @@ class games_GUI:
             opts.append(a)
             for j in d:
                 if j not in opt_keys:
-                    print 'j:'
-                    print j
+                    #print 'j:'
+                    #print j
                     a = random.choice(self.mcq_dict[j])
                     #a = a[1:len(a)]
                     opts.append(a)
@@ -71,10 +114,9 @@ class games_GUI:
             random.shuffle(opts)
             self.ques[i] = opts
         self.question.set_text(self.ques.keys()[0])
-        print self.ques
+        #print self.ques
         j=0
         for i in self.option:
-            
             i.set_label(self.ques[self.question.get_text()][j])
             j = j+1
         self.mcq_count = 0
@@ -84,28 +126,56 @@ class games_GUI:
             for j in self.ques[i]:
                 for k in self.mcq_dict[i]:
                     if k.find(j)>=0:
-                        self.ans.append(j)
+                        index = self.mcq_dict[i].index(k)
+                        self.ans.append([j,index])
         self.mcq_correct = 0
         self.mcq_incorrect = 0
+    def save_accuracy(self):
+        tmp =[]
+        for i in self.accuracy[self.ques.keys()[self.mcq_count]]:
+            tmp.append(str(i))
+        text = ':'.join(tmp)
+        #print text
+        db.save_accuracy_for_word(self.ques.keys()[self.mcq_count], text)
+        
+    def show_graph(self):
+        pass
         
     def on_proceed_clicked(self, widget, event=None):
+        #print self.mcq_count
         #print 'Hi'
-        print self.mcq_count
-        print self.total_count
-        print self.res
+        #print 'mcq_count ',
+        #print self.mcq_count
+        #print self.total_count
+        #print self.res
         if self.mcq_count < self.total_count - 1:
-            if self.res != '':
-                print 'Hello'
+            #print '###mcq_count ',
+            if self.res[0] != '':
+                #print 'Hello'
                 print self.res
-                print 'HI'
+                print self.question.get_text()
+                #print 'HI'
+                ans_index = self.ques[self.question.get_text()].index(self.ans[self.mcq_count][0])
+                #print self.res[1]
+                #print ans_index
                 self.response.append(self.res)
-                print self.response
-                if self.response[self.mcq_count]==self.ans[self.mcq_count]:
+                #print self.response
+                if self.response[self.mcq_count][0]==self.ans[self.mcq_count][0]:
+                    print 'Correct'
                     self.mcq_correct = self.mcq_correct + 1
-                    print self.mcq_correct
+                    #print self.mcq_correct
+                    self.accuracy[self.ques.keys()[self.mcq_count]][0] = self.accuracy[self.ques.keys()[self.mcq_count]][0] + 1
+                    self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
+                    self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_APPLY)]
+                    
                 else:
+                    print 'wrong'
                     self.mcq_incorrect = self.mcq_incorrect +1
-                    print self.mcq_incorrect
+                    #print self.mcq_incorrect
+                    self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
+                    self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_CLOSE)]
+                #print self.accuracy[self.ques.keys()[self.mcq_count]]
+                self.save_accuracy()
                 self.mcq_count = self.mcq_count + 1
 
                 self.question.set_text(self.ques.keys()[self.mcq_count])
@@ -116,13 +186,106 @@ class games_GUI:
                     j = j+1
 
 
-        elif self.mcq_count == self.count - 1:
-            pass
         else:
+            if self.res[0] != '':
+                #print 'Heya'
+                #print self.res
+                #print 'HI'
+                ans_index = self.ques[self.question.get_text()].index(self.ans[self.mcq_count][0])
+                self.response.append(self.res)
+                #print self.response
+                if self.response[self.mcq_count][0]==self.ans[self.mcq_count][0]:
+                    self.mcq_correct = self.mcq_correct + 1
+                    #print self.mcq_correct
+                    self.accuracy[self.ques.keys()[self.mcq_count]][0] = self.accuracy[self.ques.keys()[self.mcq_count]][0] + 1
+                    self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
+                    self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_APPLY)]
+
+                else:
+                    self.mcq_incorrect = self.mcq_incorrect +1
+                    #print self.mcq_incorrect
+                    self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
+                    self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_CLOSE)]
+                self.save_accuracy()
+                self.mcq_count = self.mcq_count + 1            
             self.question.set_text('OVER!')
+            self.builder.get_object('frame1').hide()
+            self.builder.get_object('frame3').hide()
+            self.builder.get_object('label33').show()
+            self.proceed_b.hide()
+            self.review_b.show()
+            
+            #self.show_graph()
         self.option0.set_active(True)
-        self.res = ''
+        self.builder.get_object('label17').set_text(str(self.mcq_correct))
+        self.builder.get_object('label18').set_text(str(self.mcq_incorrect))
+        self.proceed_b.set_sensitive(False)
+        self.res = ['',-1]
+        print self.review_data
         
+    def on_review_clicked(self, widget=None, event=None):
+        self.review_window = gtk.Window()
+        self.review_window.set_default_size(500,450)
+        list_tree = ['Q.No.','Question','Answer','Response', 'Result']
+        list_store = gtk.ListStore(str,str,str,str,str)
+        for row in self.review_data:
+            print len(row)
+            list_store.append(row)
+        review_tree = gtk.TreeView(list_store)
+        cell = gtk.CellRendererText()
+        cell_pb = gtk.CellRendererPixbuf()
+        i=0
+        for title in list_tree:
+            tvcolumn = gtk.TreeViewColumn(title)
+            
+            if title == 'Result':
+                #cell_data = gtk.CellRendererPixbuf()
+                tvcolumn.pack_start(cell_pb, False)
+                tvcolumn.set_attributes(cell_pb, stock_id=i)
+                
+
+            else:
+                cell_data = gtk.CellRendererText()
+                tvcolumn.pack_start(cell, True)
+                tvcolumn.set_attributes(cell, text=i)
+                
+            
+            review_tree.append_column(tvcolumn)
+            i = i+1
+
+        review_tree.set_headers_visible(True)
+        scroller = gtk.ScrolledWindow()
+        scroller.show()
+        scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        review_tree.show()
+        vbox = gtk.VBox()
+        vbox.pack_start(scroller)
+        vbox.show()
+        scroller.add_with_viewport(review_tree)
+        self.review_window.set_modal(True)
+        self.review_window.add(vbox)
+        self.review_window.show_all()
+        self.review_window.connect('destroy', self.on_review_win_destroy)
+
+    def on_review_win_destroy(self, widget=None, event=None):
+        self.review_window.destroy()
+        
+
+    def get_accuracy_table(self):
+        ac = {}
+        #l = []
+        for i in self.flash_data:
+            #print 'i ',
+            #print i
+            l = i[2].split(':')
+            #print l
+            l[0]=int(l[0])
+            l[1]=int(l[1])
+            ac[i[0]] = l
+        #print ac
+        return ac
+            
+    
     def get_mcq_data(self):
         d = {}
         for i in self.flash_data:
@@ -136,7 +299,9 @@ class games_GUI:
     def on_random_clicked(self, widget=None, event=None):
         if self.current_index < len(self.flash_data)-2:
             self.remaining = self.flash_data[self.current_index+1:len(self.flash_data)]
-        if self.check_random.get_active():
+        else:
+            self.remaining = []
+        if self.by_random.get_active():
             random.shuffle(self.remaining)
             self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining
         else:
@@ -147,43 +312,57 @@ class games_GUI:
         for i in self.option:
             if i.get_active():
                 res = i.get_label()
-                print res
-                self.res = res
+                #print res
+                index = self.option.index(i)
+                self.res = [res,index]
                 break
-                print res
-           
+                #print res
+        self.proceed_b.set_sensitive(True)
                 
     def on_radio_toggled(self, widget=None, event=None):
-        for i in [self.radio_word, self.radio_definition]:
+        for i in [self.by_word, self.by_def]:
             if i.get_active():
                 #print i.get_active()
                 #print i.get_label()
                 self.mode = i.get_label()
                 #print self.mode
         if self.mode == 'definition':
-            print self.mode
+            #print self.mode
             self.flash_frame.set_label('definition')
             self.flash_label.set_text(self.flash_data[self.current_index][1])
+            self.flash_label.set_alignment(0.1, 0.1)
         elif self.mode == 'word':
             self.flash_frame.set_label('word')
-            self.flash_label.set_text(self.flash_data[self.current_index][0])
+            self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
+            self.flash_label.set_alignment(0.5, 0.5)
     def on_games_destroy(self, widget=None, event=None):
         gtk.main_quit()
 
     def on_check_clicked(self, widget=None, event=None):
         if self.flash_frame.get_label() == 'word':
-            self.flash_frame.set_label('Definition')
+            self.flash_frame.set_label('definition')
+            self.flash_label.set_alignment(0.1,0.1)
             self.flash_label.set_text(self.flash_data[self.current_index][1])
+
         else:
             self.flash_frame.set_label('word')
-            self.flash_label.set_text(self.flash_data[self.current_index][0])
-
+            self.flash_label.set_alignment(0.5,0.5)
+            self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
+            
     def proceed(self):
         self.count = self.count + 1
         if self.current_index <= (self.total_count - 2):
             self.current_index = self.current_index + 1
-            self.flash_frame.set_label('word')
-            self.flash_label.set_text(self.flash_data[self.current_index][0])
+            if self.mode == 'word':
+                self.flash_frame.set_label('word')
+                self.flash_label.set_alignment(0.5,0.5)
+                self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
+            elif self.mode == 'definition':
+                self.flash_frame.set_label('definition')
+                self.flash_label.set_text(self.flash_data[self.current_index][1])
+                self.flash_label.set_alignment(0.1, 0.1)
+                self.flash_label.set_max_width_chars(50)
+                self.flash_label.set_line_wrap()
         elif self.current_index in range((self.total_count -2),self.total_count):
             self.current_index = self.current_index + 1
         if self.count == self.total_count:
@@ -193,7 +372,7 @@ class games_GUI:
             self.flash_label.set_text('OVER!!!')
 
     def on_iknow_clicked(self, widget=None, event=None):
-        print self.current_index
+        #print self.current_index
         if self.current_index <= (self.total_count - 1):
             self.correct_no = self.correct_no + 1
             self.correct_label.set_text(str(self.correct_no))
@@ -207,8 +386,27 @@ class games_GUI:
             self.incorrect.append(self.flash_data[self.current_index])
             self.proceed()
 
+    def on_window_destroy(self, widget=None, event=None):
+        gtk.main_quit()
+        wordgroupz.win.window.show()
+def flash():
+    global db
+    db = wordgroupz.wordGroupzSql()
+    g = games_GUI()
+    g.builder.get_object('window2').show()
+    #wordgroupz.win.window.hide()
+    gtk.main()
+
+def mcq():
+    global db
+    db = wordgroupz.wordGroupzSql()
+    g = games_GUI()
+    g.builder.get_object('window3').show()
+    gtk.main()
+    
 if __name__ == '__main__':
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
-    g.window.show()
+    #g.window.show()
+    g.builder.get_object('window3').show()
     gtk.main()
