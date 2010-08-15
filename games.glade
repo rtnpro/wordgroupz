@@ -181,7 +181,7 @@
                             <child>
                               <object class="GtkImage" id="image3">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-close</property>
+                                <property name="icon_name">edit-delete</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -299,7 +299,7 @@
                             <child>
                               <object class="GtkImage" id="image6">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-close</property>
+                                <property name="icon_name">edit-delete</property>
                               </object>
                               <packing>
                                 <property name="position">0</property>
@@ -543,8 +543,11 @@
     </child>
   </object>
   <object class="GtkWindow" id="window2">
+    <property name="title" translatable="yes">wordGroupz - Flash Card</property>
+    <property name="modal">True</property>
     <property name="default_width">500</property>
     <property name="default_height">500</property>
+    <property name="destroy_with_parent">True</property>
     <signal name="destroy" handler="on_window_destroy"/>
     <child>
       <object class="GtkEventBox" id="eventbox3">
@@ -776,7 +779,7 @@
                                         <child>
                                           <object class="GtkImage" id="image18">
                                             <property name="visible">True</property>
-                                            <property name="stock">gtk-close</property>
+                                            <property name="icon_name">edit-delete</property>
                                           </object>
                                           <packing>
                                             <property name="position">0</property>
@@ -841,6 +844,9 @@
                               <object class="GtkLabel" id="label26">
                                 <property name="visible">True</property>
                                 <property name="xalign">0.10000000149011612</property>
+                                <attributes>
+                                  <attribute name="foreground" value="#ffffffffffff"/>
+                                </attributes>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -868,6 +874,9 @@
                               <object class="GtkLabel" id="label27">
                                 <property name="visible">True</property>
                                 <property name="xalign">0.10000000149011612</property>
+                                <attributes>
+                                  <attribute name="foreground" value="#ffffffffffff"/>
+                                </attributes>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -884,7 +893,7 @@
                             <child>
                               <object class="GtkImage" id="image15">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-close</property>
+                                <property name="stock">gtk-delete</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -895,6 +904,9 @@
                               <object class="GtkLabel" id="label28">
                                 <property name="visible">True</property>
                                 <property name="xalign">0.10000000149011612</property>
+                                <attributes>
+                                  <attribute name="foreground" value="#ffffffffffff"/>
+                                </attributes>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -924,13 +936,13 @@
     </child>
   </object>
   <object class="GtkWindow" id="window3">
-    <property name="title" translatable="yes">MCQ</property>
+    <property name="title" translatable="yes">wordGroupz - MCQ</property>
     <property name="modal">True</property>
     <property name="default_width">500</property>
     <property name="default_height">450</property>
     <property name="destroy_with_parent">True</property>
+    <property name="icon_name">accessories-dictionary</property>
     <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
     <signal name="destroy" handler="on_window_destroy"/>
     <child>
       <object class="GtkEventBox" id="eventbox1">
@@ -1039,6 +1051,13 @@
                                         <property name="draw_indicator">True</property>
                                         <property name="group">option0</property>
                                         <signal name="toggled" handler="on_opts_toggled"/>
+                                        <child>
+                                          <object class="GtkLabel" id="opt_label1">
+                                            <property name="visible">True</property>
+                                            <property name="wrap">True</property>
+                                            <property name="wrap_mode">word-char</property>
+                                          </object>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="position">1</property>
@@ -1052,6 +1071,13 @@
                                         <property name="draw_indicator">True</property>
                                         <property name="group">option0</property>
                                         <signal name="toggled" handler="on_opts_toggled"/>
+                                        <child>
+                                          <object class="GtkLabel" id="opt_label2">
+                                            <property name="visible">True</property>
+                                            <property name="wrap">True</property>
+                                            <property name="wrap_mode">word-char</property>
+                                          </object>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="position">2</property>
@@ -1062,9 +1088,18 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="yalign">0</property>
                                         <property name="draw_indicator">True</property>
                                         <property name="group">option0</property>
                                         <signal name="toggled" handler="on_opts_toggled"/>
+                                        <child>
+                                          <object class="GtkLabel" id="opt_label3">
+                                            <property name="visible">True</property>
+                                            <property name="yalign">0</property>
+                                            <property name="wrap">True</property>
+                                            <property name="wrap_mode">word-char</property>
+                                          </object>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="position">3</property>
@@ -1078,6 +1113,14 @@
                                         <property name="draw_indicator">True</property>
                                         <property name="group">option0</property>
                                         <signal name="toggled" handler="on_opts_toggled"/>
+                                        <child>
+                                          <object class="GtkLabel" id="opt_label4">
+                                            <property name="visible">True</property>
+                                            <property name="yalign">0</property>
+                                            <property name="wrap">True</property>
+                                            <property name="wrap_mode">word-char</property>
+                                          </object>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="position">4</property>
@@ -1272,7 +1315,7 @@
                     <child>
                       <object class="GtkImage" id="image11">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-close</property>
+                        <property name="icon_name">edit-delete</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

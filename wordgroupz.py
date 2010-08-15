@@ -671,6 +671,8 @@ class wordzGui:
         self.get_group = gtk.combo_box_entry_new_text()
         self.get_group.set_tooltip_text("Enter a group for your word")
         self.details = self.builder.get_object("textview1")
+        self.eventbox1 = self.builder.get_object('eventbox1')
+        self.eventbox1.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         #self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
@@ -719,13 +721,13 @@ class wordzGui:
         self.chose_dict_hbox = self.builder.get_object('hbox7')
         vseparator = gtk.VSeparator()
         vseparator.show()
-
+        """
         self.chose_dict = gtk.combo_box_new_text()
         for dict in ['webster', 'wordnet', 'wiktionary']:
             self.chose_dict.append_text(dict)
         self.chose_dict.set_active(1)
         self.chose_dict.show()
-        self.hbox5.pack_start(self.chose_dict, False, True, padding = 5)
+        self.hbox5.pack_start(self.chose_dict, False, True, padding = 5)"""
         
         #webkit in scrolledwindow4
         self.web_vbox = gtk.VBox()
@@ -760,11 +762,11 @@ class wordzGui:
         self.vbox7 = self.builder.get_object('vbox7')
         self.hbox2 = self.builder.get_object('hbox2')
         self.welcome = gtk.Frame()
-        self.hbox2.remove(self.vbox7)
+        self.hbox2.remove(self.builder.get_object('frame2'))
         self.hbox2.pack_start(self.welcome)
         self.welcome.show()
         self.note = gtk.Label()
-        self.note.set_markup('<b>Welcome to wordGroupz</b>')
+        self.note.set_markup('<span foreground="white"><big><big><big><b>Welcome to wordGroupz</b></big></big></big></span>')
         self.note.show()
         self.welcome.add(self.note)
         '''
@@ -1069,11 +1071,12 @@ class wordzGui:
     def on_notebook1_change_current_page(self, widget=None, event=None):
         notebook1 = self.builder.get_object('notebook1')
         #print notebook1.get_current_page()"""
-    """
+    
     def on_notebook1_switch_page(self, notebook, page, page_num):
         #print 'page switched'
         #print page_num
         width, height = self.window.get_size()
+        """
         if page_num==1:
             #self.window.resize(max(width, 800), max(height, 550))
             #print self.tree_value, self.wiki_word, self.browser_load_status
@@ -1085,8 +1088,8 @@ class wordzGui:
                 #self.browser.open(self.url)
                 #self.on_lookup_wiki_clicked()'''
         elif page_num == 0:
-            self.show_details_tree()
-            self.window.resize(min(width, 700), min(height, 550))"""
+            self.show_details_tree()"""
+
             
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
@@ -1108,7 +1111,7 @@ class wordzGui:
         if self.iter is not None:
             if self.welcome is self.hbox2.get_children()[1]:
                 self.hbox2.remove(self.welcome)
-                self.hbox2.pack_start(self.vbox7)
+                self.hbox2.pack_start(self.builder.get_object('frame2'))
             self.tree_value = self.model.get_value(self.iter,0)
             #print self.tree_value
             self.selected_word.show()
@@ -1180,7 +1183,7 @@ class wordzGui:
                         #hbox_n = gtk.HBox()
                         event_b = gtk.EventBox()
                         event_b.set_visible_window(True)
-                        event_b.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                        event_b.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
                         frame = gtk.Frame()
                         frame.set_shadow_type(gtk.SHADOW_OUT)
                         #frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
@@ -1234,7 +1237,7 @@ class wordzGui:
                         label.show()
                         eventbox = gtk.EventBox()
                         eventbox.set_visible_window(True)
-                        eventbox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
+                        eventbox.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#5C97BF"))
                         #eventbox.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
                         eventbox.add(label)
                         eventbox.show()
@@ -1277,7 +1280,7 @@ class wordzGui:
                     #sub_sub_str = ''
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
-                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
                     eventb.show()
                     main_label = gtk.Label()
                     main_label.set_markup('<b>'+x.lstrip('#')+'</b>')
@@ -1320,7 +1323,7 @@ class wordzGui:
                     #pass
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
-                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
                     eventb.show()
                     sub_sub_vbox = gtk.VBox()
                     sub_sub_vbox.show()
@@ -1330,7 +1333,7 @@ class wordzGui:
                     sub_sub_label.show()
                     hbox.pack_start(sub_sub_vbox, False)
                     sub_sub_vbox.pack_start(sub_sub_label, False)
-                    sub_sub_frame = gtk.Frame(x.lstrip('\t#'))
+                    sub_sub_frame = gtk.Frame(' ')
                     
                     label = sub_sub_frame.get_label_widget()
                     label.set_markup('<b>'+x.lstrip('\t#')+'</b>')
@@ -1372,9 +1375,12 @@ class wordzGui:
                     #sub_sub_sub_iter = self.details_treestore.append(sub_sub_iter, ['<b>'+x.lstrip('\t\t#')+'</b>'])
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
-                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DBC2C0"))
+                    eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
                     eventb.show()
-                    sub_sub_sub_frame = gtk.Frame(x.lstrip('\t\t#'))
+                    sub_sub_sub_frame = gtk.Frame(' ')
+                    label = sub_sub_sub_frame.get_label_widget()
+                    label.set_markup('<b>'+x.lstrip('\t\t#')+'</b>')
+                    sub_sub_sub_frame.set_label_widget(label)
                     sub_sub_sub_frame.show()
                     sub_sub_sub_sub_vbox = gtk.VBox()
                     sub_sub_sub_sub_vbox.show()
@@ -1578,14 +1584,13 @@ class wordzGui:
         self.builder.get_object('look_webster').set_sensitive(True)
 
     def on_show_stats_clicked(self, widget=None, event=None):
-        conn = sqlite3.connect('/home/rtnpro/.wordgroupz/wordz')
+        conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
         l = c.fetchall()
-        print l
+        #print l
         c.close()
         conn.close()
-
 
         N = len(l)
         words = ()
@@ -1601,24 +1606,15 @@ class wordzGui:
             val = val + (h,)
             err = err + (0,)
 
-        print words, val, err
-
-        #menStd =   (2, 3, 4, 1, 2)
-
+        #print words, val, err
         ind = np.arange(N)  # the x locations for the groups
-        width = 0.20       # the width of the bars
+        width = 0.40       # the width of the bars
 
         fig = plt.figure()
         ax = fig.add_subplot(111)
         rects1 = ax.bar(ind, val, width, color='g')
-
-        #womenMeans = (25, 32, 34, 20, 25)
-        #womenStd =   (3, 5, 2, 3, 3)
-        #rects2 = ax.bar(ind+width, womenMeans, width, color='y', yerr=womenStd)
-
-        # add some
         ax.set_ylabel('Accuracy')
-        ax.set_title('Accuracy for words')
+        ax.set_title('Accuracy for words', bbox = {'facecolor':'0.8', 'pad':5})
         ax.set_xticks(ind+width)
         ax.set_xticklabels( words )
 
@@ -1629,17 +1625,19 @@ class wordzGui:
                 ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, '%d'%int(height),
                         ha='center', va='bottom')
         canvas = FigureCanvasGTK(fig)
+        canvas.set_size_request(100*len(words),500)
         canvas.show()
         autolabel(rects1)
         graphwin = gtk.Window()
+        graphwin.set_default_size(600, 500)
         scroller = gtk.ScrolledWindow()
         scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox = gtk.VBox()
         vbox.show()
-        #scroller.add_with_viewport(canvas)
+        scroller.add_with_viewport(canvas)
         #vbox.pack_start(scroller)
         canvas.show()
-        graphwin.add(canvas)
+        graphwin.add(scroller)
         graphwin.show_all()
 if __name__ == "__main__":
     wordz_db=wordGroupzSql()

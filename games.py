@@ -53,9 +53,8 @@ class games_GUI:
         for i in range(1,5):
             self.option.append(self.builder.get_object('option'+str(i)))
         self.mcq_dict = self.get_mcq_data()
-        #print self.mcq_dict
         self.set_up_mcq()
-        self.builder.get_object('label9').set_text(str(self.total_count))
+        self.builder.get_object('label9').set_text(str(len(self.ques.keys())))
         self.proceed_b = self.builder.get_object('proceed')
         self.proceed_b.set_sensitive(False)
         #self.builder.get_object('scrolledwindow2').show()
@@ -80,7 +79,7 @@ class games_GUI:
         self.game_mode_sub.append(self.by_def)
         self.game_mode_sub.append(self.by_random)
         self.game_mode.set_submenu(self.game_mode_sub)
-        #print self.by_def
+
 
         #mcq
         self.eventbox1 = self.builder.get_object('eventbox1')
@@ -96,8 +95,6 @@ class games_GUI:
     def set_up_mcq(self):
         d = self.mcq_dict.keys()
         random.shuffle(d)
-        #print 'd = ',
-        #print d
         self.ques = {}
         for i in d:
             opts = []
@@ -117,11 +114,13 @@ class games_GUI:
                     break
             random.shuffle(opts)
             self.ques[i] = opts
-        self.question.set_text(self.ques.keys()[0])
-        #print self.ques
+        self.question.set_markup('<big><big><b>'+self.ques.keys()[0]+'</b></big></big>')
         j=0
         for i in self.option:
+            
             i.set_label(self.ques[self.question.get_text()][j])
+            label = i.get_child()
+            label.set_line_wrap(True)
             j = j+1
         self.mcq_count = 0
         self.response = []
@@ -139,54 +138,39 @@ class games_GUI:
         for i in self.accuracy[self.ques.keys()[self.mcq_count]]:
             tmp.append(str(i))
         text = ':'.join(tmp)
-        #print text
         db.save_accuracy_for_word(self.ques.keys()[self.mcq_count], text)
         
     def show_graph(self):
         pass
-        
+
     def on_proceed_clicked(self, widget, event=None):
-        #print self.mcq_count
-        #print 'Hi'
-        #print 'mcq_count ',
-        #print self.mcq_count
-        #print self.total_count
-        #print self.res
-        if self.mcq_count < self.total_count - 1:
-            #print '###mcq_count ',
+        if self.mcq_count < len(self.ques.keys()) - 1:
             if self.res[0] != '':
-                #print 'Hello'
-                #print self.res
-                #print self.question.get_text()
-                #print 'HI'
                 ans_index = self.ques[self.question.get_text()].index(self.ans[self.mcq_count][0])
-                #print self.res[1]
-                #print ans_index
                 self.response.append(self.res)
-                #print self.response
                 if self.response[self.mcq_count][0]==self.ans[self.mcq_count][0]:
-                    #print 'Correct'
                     self.mcq_correct = self.mcq_correct + 1
-                    #print self.mcq_correct
                     self.accuracy[self.ques.keys()[self.mcq_count]][0] = self.accuracy[self.ques.keys()[self.mcq_count]][0] + 1
                     self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
                     self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_APPLY)]
                     
                 else:
-                    #print 'wrong'
                     self.mcq_incorrect = self.mcq_incorrect +1
-                    #print self.mcq_incorrect
                     self.accuracy[self.ques.keys()[self.mcq_count]][1] = self.accuracy[self.ques.keys()[self.mcq_count]][1] + 1
                     self.review_data = self.review_data + [(self.mcq_count + 1, self.ques.keys()[self.mcq_count], ans_index+1, self.res[1]+1, gtk.STOCK_CLOSE)]
-                #print self.accuracy[self.ques.keys()[self.mcq_count]]
                 self.save_accuracy()
                 self.mcq_count = self.mcq_count + 1
+                try:
+                    self.question.set_markup('<big><big><b>'+self.ques.keys()[self.mcq_count]+'</b></big></big>')
+                except:
+                    print 'out of index error line 187'
 
-                self.question.set_text(self.ques.keys()[self.mcq_count])
                 j = 0
                 for i in self.option:
 
                     i.set_label(self.ques[self.question.get_text()][j])
+                    label = i.get_child()
+                    label.set_line_wrap(True)
                     j = j+1
 
 
@@ -314,9 +298,12 @@ class games_GUI:
             self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining.sort()
             
     def on_opts_toggled(self, widget=None, event=None):
+        j = 1
         for i in self.option:
             if i.get_active():
                 res = i.get_label()
+                #label = i.get_child()
+                #res = label.get_text()
                 #print res
                 index = self.option.index(i)
                 self.res = [res,index]
@@ -417,6 +404,7 @@ def flash():
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
     g.builder.get_object('window2').show()
+    g.builder.get_object('window2').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     #wordgroupz.win.window.hide()
     gtk.main()
 
@@ -425,6 +413,7 @@ def mcq():
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
     g.builder.get_object('window3').show()
+    g.builder.get_object('window3').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     gtk.main()
     
 if __name__ == '__main__':

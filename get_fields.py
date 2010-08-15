@@ -46,7 +46,7 @@ class get_wiki_data:
                     if index[0] == '1':
                         self.fields.append(j)
                         
-        print self.fields
+        #print self.fields
 
     def cleanup(self):
         #for i in self.fields:
@@ -71,10 +71,10 @@ class get_wiki_data:
 
     def show(self, key):
         if key in self.dict.keys():
-            print key+':'
+            #print key+':'
             count = 1
             for i in self.dict[key]:
-                print '\t'+ str(count)+'. '+i
+                #print '\t'+ str(count)+'. '+i
                 count = count + 1
     def get_field_details(self):
         self.dict = {}
