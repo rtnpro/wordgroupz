@@ -732,6 +732,7 @@ class wordzGui:
         #webkit in scrolledwindow4
         self.web_vbox = gtk.VBox()
         self.scroller = gtk.ScrolledWindow()
+        self.scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.browser = WebView()
         #self.browser.settings.enable_universal_access_from_file_uris(True)
         self.settings = self.browser.get_settings()
@@ -745,6 +746,7 @@ class wordzGui:
         self.web_vbox.pack_start(self.scroller)
         self.scroller.show()
         self.progress = gtk.ProgressBar()
+        self.progress.hide()
         self.browser.connect("load-progress-changed", self.load_progress_changed)
         self.browser.connect("load_started", self.load_started)
         self.browser.connect("load-finished", self.load_finished)
@@ -761,14 +763,14 @@ class wordzGui:
         self.save_audio.set_label('Download pronunciation')
         self.vbox7 = self.builder.get_object('vbox7')
         self.hbox2 = self.builder.get_object('hbox2')
-        self.welcome = gtk.Frame()
-        self.hbox2.remove(self.builder.get_object('frame2'))
+        self.welcome = self.builder.get_object('frame3')
+        self.frame2 = self.builder.get_object('frame2')
+        self.frame2.hide()
         self.hbox2.pack_start(self.welcome)
         self.welcome.show()
-        self.note = gtk.Label()
+        self.note = self.builder.get_object('label16')
         self.note.set_markup('<span foreground="white"><big><big><big><b>Welcome to wordGroupz</b></big></big></big></span>')
-        self.note.show()
-        self.welcome.add(self.note)
+        self.note.set_alignment(0.5, 0.2)
         '''
         self.toolbar = self.builder.get_object('toolbar1')
         self.speak_icon = gtk.Image()
@@ -1075,7 +1077,7 @@ class wordzGui:
     def on_notebook1_switch_page(self, notebook, page, page_num):
         #print 'page switched'
         #print page_num
-        width, height = self.window.get_size()
+        #width, height = self.window.get_size()
         """
         if page_num==1:
             #self.window.resize(max(width, 800), max(height, 550))
@@ -1089,7 +1091,16 @@ class wordzGui:
                 #self.on_lookup_wiki_clicked()'''
         elif page_num == 0:
             self.show_details_tree()"""
-
+        self.show_details_tree()
+    def on_notebook2_switch_page(self, notebook, page, page_num):
+        if page_num == 0:
+            self.show_details_tree()
+        elif page_num == 1:
+            if self.tree_value == self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
+                pass
+            else:
+                self.on_lookup_wiki_clicked(self.tree_value)
+            
             
     def on_search_changed(self,widget=None,event=None):
         search_txt = self.search.get_text()
@@ -1108,10 +1119,16 @@ class wordzGui:
 
     def tree_select_changed(self, widget=None, event=None):
         self.model, self.iter = self.selection.get_selected()
+        self.frame2.show()
         if self.iter is not None:
+            self.delete_b = self.builder.get_object('delete')
+            self.play_b = self.builder.get_object('speak')
+            self.delete_b.set_sensitive(True)
+            self.play_b.set_sensitive(True)
             if self.welcome is self.hbox2.get_children()[1]:
-                self.hbox2.remove(self.welcome)
-                self.hbox2.pack_start(self.builder.get_object('frame2'))
+                self.welcome.hide()
+            #    self.hbox2.remove(self.welcome)
+            #    self.hbox2.pack_start(self.builder.get_object('frame2'))
             self.tree_value = self.model.get_value(self.iter,0)
             #print self.tree_value
             self.selected_word.show()
@@ -1427,15 +1444,18 @@ class wordzGui:
             wordz_db.delete_word(self.tree_value)
             #self.get_group.remove_text(sel)
         self.treestore.remove(self.iter)
-        buff = self.output_txtview.get_buffer()
-        buff.set_text('')
-        self.output_txtview.set_buffer(buff)
+        #buff = self.output_txtview.get_buffer()
+        #buff.set_text('')
+        #self.output_txtview.set_buffer(buff)
         get_group_ch = self.get_group.child
         group = get_group_ch.get_text()
         self.refresh_groups(group, 1)
-        self.hbox2.remove(self.vbox7)
-        self.note.set_text('Nothing selected')
-        self.hbox2.pack_start(self.welcome)
+        self.frame2.hide()
+        self.welcome.show()
+        self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
+        #self.hbox2.pack_start(self.welcome)
+        self.play_b.set_sensitive(False)
+        self.delete_b.set_sensitive(False)
 
     def on_edit_clicked(self, widget=None, event=None):
         self.output_txtview.set_editable(True)
@@ -1468,11 +1488,7 @@ class wordzGui:
         wordz_db.add_to_db(word, group, detail)
         self.refresh_groups(group)
         self.treestore.clear()
-        for group in wordz_db.list_groups():
-            piter = self.treestore.append(None, [group])
-            for word in wordz_db.list_words_per_group(group):
-                self.treestore.append(piter, [word])
-        
+        self.on_back_clicked()
 
     def item_list_changed(self, widget=None, event=None):
         key = gtk.gdk.keyval_name(event.keyval)
@@ -1500,18 +1516,34 @@ class wordzGui:
 
 
     def on_back_clicked(self, widget=None, data=None):
+        if self.search.get_text()!= '':
+            self.frame2.hide()
+            self.search.set_text('')
+            self.welcome.show()
+            self.note.set_alignment(0.5, 0.1)
+            self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
+            return
         self.treestore.clear()
-        self.search.set_text('')
+        #self.search.set_text('')
         for group in wordz_db.list_groups():
             piter = self.treestore.append(None, [group])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word])
         self.treeview.expand_all()
-        buff = self.output_txtview.get_buffer()
-        buff.set_text('Nothing selected')
-        self.output_txtview.set_buffer(buff)
+        #buff = self.output_txtview.get_buffer()
+        #buff.set_text('Nothing selected')
+        #self.output_txtview.set_buffer(buff)
         self.selected_word.set_text('')
-        self.selected_word.hide()
+        #self.show_details_tree()
+        #self.selected_word.hide()
+        self.frame2.hide()
+        self.welcome.show()
+        self.note.set_alignment(0.5, 0.1)
+        self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
+        
+
+        self.play_b.set_sensitive(False)
+        self.delete_b.set_sensitive(False)
 
 
     def on_get_details_clicked(self, widget, data=None):
