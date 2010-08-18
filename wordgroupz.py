@@ -766,7 +766,7 @@ class wordzGui:
         self.welcome = self.builder.get_object('frame3')
         self.frame2 = self.builder.get_object('frame2')
         self.frame2.hide()
-        self.hbox2.pack_start(self.welcome)
+        #self.hbox2.pack_start(self.welcome)
         self.welcome.show()
         self.note = self.builder.get_object('label16')
         self.note.set_markup('<span foreground="white"><big><big><big><b>Welcome to wordGroupz</b></big></big></big></span>')
