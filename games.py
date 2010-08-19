@@ -24,7 +24,11 @@ class games_GUI:
         label=self.flash_frame.get_label_widget()
         label.set_text('word')
         label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-        self.flash_frame.set_label_widget(label)
+        try:
+            if self.flash_frame.get_label_widget()!=NULL:
+                self.flash_frame.set_label_widget(label)
+        except:
+            pass
         self.current_index = 0
         self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
         self.check = self.builder.get_object('check')
@@ -146,6 +150,7 @@ class games_GUI:
     def on_proceed_clicked(self, widget, event=None):
         if self.mcq_count < len(self.ques.keys()) - 1:
             if self.res[0] != '':
+                #print self.ans
                 ans_index = self.ques[self.question.get_text()].index(self.ans[self.mcq_count][0])
                 self.response.append(self.res)
                 if self.response[self.mcq_count][0]==self.ans[self.mcq_count][0]:
@@ -163,7 +168,8 @@ class games_GUI:
                 try:
                     self.question.set_markup('<big><big><b>'+self.ques.keys()[self.mcq_count]+'</b></big></big>')
                 except:
-                    print 'out of index error line 187'
+                    #print 'out of index error line 187'
+                    pass
 
                 j = 0
                 for i in self.option:
@@ -323,14 +329,22 @@ class games_GUI:
             label=self.flash_frame.get_label_widget()
             label.set_text('definition')
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-            self.flash_frame.set_label_widget(label)
+            try:
+                if self.flash_frame.get_label_widget()!=NULL:
+                    self.flash_frame.set_label_widget(label)
+            except:
+                pass
             self.flash_label.set_text(self.flash_data[self.current_index][1])
             self.flash_label.set_alignment(0.1, 0.1)
         elif self.mode == 'word':
             label=self.flash_frame.get_label_widget()
             label.set_text('word')
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-            self.flash_frame.set_label_widget(label)
+            try:
+                if self.flash_frame.get_label_widget()!=NULL:
+                    self.flash_frame.set_label_widget(label)
+            except:
+                pass
             self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             self.flash_label.set_alignment(0.5, 0.5)
     def on_games_destroy(self, widget=None, event=None):
@@ -341,7 +355,11 @@ class games_GUI:
             label=self.flash_frame.get_label_widget()
             label.set_text('definition')
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-            self.flash_frame.set_label_widget(label)
+            try:
+                if self.flash_frame.get_label_widget!=NULL:
+                    self.flash_frame.set_label_widget(label)
+            except:
+                pass
             self.flash_label.set_alignment(0.1,0.1)
             self.flash_label.set_text(self.flash_data[self.current_index][1])
 
@@ -349,7 +367,11 @@ class games_GUI:
             label=self.flash_frame.get_label_widget()
             label.set_text('word')
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-            self.flash_frame.set_label_widget(label)
+            try:
+                if self.flash_frame.get_label.widget()!=NULL:
+                    self.flash_frame.set_label_widget(label)
+            except:
+                pass
             self.flash_label.set_alignment(0.5,0.5)
             self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             
@@ -361,14 +383,22 @@ class games_GUI:
                 label = self.flash_frame.get_label_widget()
                 label.set_text('word')
                 label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-                self.flash_frame.set_label_widget(label)
+                try:
+                    if self.flash_frame.get_label_widget()!=NULL:
+                        self.flash_frame.set_label_widget(label)
+                except:
+                    pass
                 self.flash_label.set_alignment(0.5,0.5)
                 self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             elif self.mode == 'definition':
                 label = self.flash_frame.get_label_widget()
                 label.set_text('definition')
                 label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-                self.flash_frame.set_label_widget(label)
+                try:
+                    if self.flash_frame.get_label_widget()!=NULL:
+                        self.flash_frame.set_label_widget(label)
+                except:
+                    pass
 
                 self.flash_label.set_text(self.flash_data[self.current_index][1])
                 self.flash_label.set_alignment(0.1, 0.1)

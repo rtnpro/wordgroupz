@@ -49,7 +49,7 @@ def threaded(f):
 class get_def_thread(threading.Thread):
     stopthread = threading.Event()
     def run(self):
-        print 'searching webster'
+        #print 'searching webster'
         word = win.tree_value
         #dic = win.chose_dict.get_active_text()
         #print dic
@@ -1354,7 +1354,11 @@ class wordzGui:
                     
                     label = sub_sub_frame.get_label_widget()
                     label.set_markup('<b>'+x.lstrip('\t#')+'</b>')
-                    sub_sub_frame.set_label_widget(label)
+                    try:
+                        if sub_sub_frame.get_label_widget()!=NULL:
+                            sub_sub_frame.set_label_widget(label)
+                    except:
+                        pass
                     sub_sub_frame.show()
                     sub_label = gtk.Label('')
                     sub_label.show()
@@ -1397,7 +1401,11 @@ class wordzGui:
                     sub_sub_sub_frame = gtk.Frame(' ')
                     label = sub_sub_sub_frame.get_label_widget()
                     label.set_markup('<b>'+x.lstrip('\t\t#')+'</b>')
-                    sub_sub_sub_frame.set_label_widget(label)
+                    try:
+                        if sub_sub_sub_frame.get_label_widget()!=NULL:
+                            sub_sub_sub_frame.set_label_widget(label)
+                    except:
+                        pass
                     sub_sub_sub_frame.show()
                     sub_sub_sub_sub_vbox = gtk.VBox()
                     sub_sub_sub_sub_vbox.show()
@@ -1596,7 +1604,7 @@ class wordzGui:
         threading.Thread(target=self._startthread).start()
 
     def _startthread(self):
-        print 'searching webster'
+        #print 'searching webster'
         self.builder.get_object('look_webster').set_sensitive(False)
         label = self.builder.get_object('label13')
         label.set_text('Searching...')
@@ -1611,7 +1619,7 @@ class wordzGui:
             
             wordz_db.save_webster(win.tree_value, defs)
         defs = '\n' + "webster:\n" + defs + '\n'
-        print defs
+        #print defs
         label.set_text(defs.encode('utf-8'))
         self.builder.get_object('look_webster').set_sensitive(True)
 

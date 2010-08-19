@@ -41,7 +41,6 @@
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkButton" id="show_stats">
-                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_markup">Show accuracy chart for words</property>
@@ -75,6 +74,7 @@
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_markup">Speak</property>
                     <signal name="clicked" handler="on_speak_clicked"/>
                     <child>
                       <object class="GtkImage" id="image1">
@@ -90,13 +90,18 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="delete">
-                    <property name="label">gtk-delete</property>
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="tooltip_markup">Delete</property>
                     <signal name="clicked" handler="on_delete_clicked"/>
+                    <child>
+                      <object class="GtkImage" id="image4">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-delete</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -128,7 +133,6 @@
                             <property name="visible">True</property>
                             <child>
                               <object class="GtkButton" id="back">
-                                <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Go back to initial view</property>
