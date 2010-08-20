@@ -687,21 +687,44 @@ class wordzGui:
 
         self.hbox5 = self.builder.get_object("hbox5")
         self.hbox5.hide()
-        self.treestore = gtk.TreeStore(str)
+        self.treestore = gtk.TreeStore(str, str)
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        c.execute("""select word, accuracy from word_groups""")
+        l = c.fetchall()
+        print 'l', l
+        c.close()
+        self.acc_dict = {}
+        for i in l:
+            if i[1] == u'0:0':
+                self.acc_dict[i] = 'N/A'
+            else:
+                t = i[1].split(':')
+                acc = float(t[0])/float(t[1])*100
+                self.acc_dict[i[0]] = str(acc)[0:4]+'%'
+        print self.acc_dict
         for group in wordz_db.list_groups():
-            piter = self.treestore.append(None, [group])
+            piter = self.treestore.append(None, [group,''])
             for word in wordz_db.list_words_per_group(group):
-                self.treestore.append(piter, [word])
+                self.treestore.append(piter, [word,'\t'+self.acc_dict[str(word)]])
+                """
+                try:
+                    self.treestore.append(piter, [word,self.acc_dict[word]])
+                except:
+                    self.treestore.append(piter, [word,'n/a'])"""
         self.treeview = gtk.TreeView(self.treestore)
         self.tvcolumn = gtk.TreeViewColumn('Word Groups')
-        #self.tvcolumn1 = gtk.TreeViewColumn('')
+        self.tvcolumn1 = gtk.TreeViewColumn('Accuracy')
         self.treeview.append_column(self.tvcolumn)
+        self.treeview.append_column(self.tvcolumn1)
         #self.treeview.append_column(self.tvcolumn1)
         self.cell = gtk.CellRendererText()
-        #self.cell1 = gtk.CellRendererPixbuf()
-        #self.tvcolumn1 = gtk.TreeViewColumn('', self.cell1)
+        #self.cell1 = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
+        self.tvcolumn1.pack_start(self.cell, True)
+        #self.tvcolumn.pack_start(self.cell1, True)
+        self.tvcolumn1.add_attribute(self.cell, 'text', 1)
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(False)
