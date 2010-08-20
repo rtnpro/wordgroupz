@@ -687,12 +687,12 @@ class wordzGui:
 
         self.hbox5 = self.builder.get_object("hbox5")
         self.hbox5.hide()
-        self.treestore = gtk.TreeStore(str, str)
+        self.treestore = gtk.TreeStore(str, int)
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
         l = c.fetchall()
-        print 'l', l
+        #print 'l', l
         c.close()
         self.acc_dict = {}
         for i in l:
@@ -701,12 +701,20 @@ class wordzGui:
             else:
                 t = i[1].split(':')
                 acc = float(t[0])/float(t[1])*100
-                self.acc_dict[i[0]] = str(acc)[0:4]+'%'
-        print self.acc_dict
+                acc = int(acc)
+                self.acc_dict[i[0]] = acc
+        #print self.acc_dict
         for group in wordz_db.list_groups():
-            piter = self.treestore.append(None, [group,''])
+            l = wordz_db.list_words_per_group(group)
+            t = 0
+            count = 0
+            for i in l:
+                t = t + self.acc_dict[i]
+                count = count + 1
+            t = t/count
+            piter = self.treestore.append(None, [group,t])
             for word in wordz_db.list_words_per_group(group):
-                self.treestore.append(piter, [word,'\t'+self.acc_dict[str(word)]])
+                self.treestore.append(piter, [word,self.acc_dict[word]])
                 """
                 try:
                     self.treestore.append(piter, [word,self.acc_dict[word]])
@@ -719,12 +727,13 @@ class wordzGui:
         self.treeview.append_column(self.tvcolumn1)
         #self.treeview.append_column(self.tvcolumn1)
         self.cell = gtk.CellRendererText()
+        self.cellpb = gtk.CellRendererProgress()
         #self.cell1 = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
-        self.tvcolumn1.pack_start(self.cell, True)
+        self.tvcolumn1.pack_start(self.cellpb, True)
         #self.tvcolumn.pack_start(self.cell1, True)
-        self.tvcolumn1.add_attribute(self.cell, 'text', 1)
+        self.tvcolumn1.add_attribute(self.cellpb, 'value', 1)
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(False)
@@ -877,6 +886,7 @@ class wordzGui:
         #self.scroller3.show()
         self.vbox12 = self.builder.get_object('vbox12')
         self.vbox8 = self.builder.get_object('vbox8')
+        self.vbox13 = self.builder.get_object('vbox13')
         #self.vbox12.set_spacing(10)
     
     def on_flash_card_clicked(self, widget=None, event=None):
@@ -1115,6 +1125,9 @@ class wordzGui:
         elif page_num == 0:
             self.show_details_tree()"""
         self.show_details_tree()
+        if page_num == 2:
+            print 'Hello'
+            self.show_details_tree()
     def on_notebook2_switch_page(self, notebook, page, page_num):
         if page_num == 0:
             self.show_details_tree()
@@ -1195,6 +1208,8 @@ class wordzGui:
             self.vbox12.remove(i)
         for i in self.vbox8.get_children():
             self.vbox8.remove(i)
+        for i in self.vbox13.get_children():
+            self.vbox13.remove(i)
         try:
             wn = wordz_db.get_dict_data('wordnet', self.tree_value)[0]
         except:
@@ -1216,7 +1231,7 @@ class wordzGui:
                 self.vbox12.pack_start(table, False, padding = 5)
                 i = 0
                 t = wn.split('\n')
-                piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
+                #piter = self.details_treestore.append(None, ['<span foreground="blue"><big><b>Wordnet</b></big></span>'])
                 for x in t:
                     if not x.startswith('\t') and x is not u'':
                         #sub_iter = self.details_treestore.append(piter, ['<b>'+x+'</b>'])
@@ -1458,10 +1473,121 @@ class wordzGui:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
 
         if ws != u'':
+            print ws
+            ws_table = gtk.Table(columns=2)
+            ws_table.show()
+            self.vbox13.pack_start(ws_table, False, padding = 5)
+            k = 0
+            #label = self.builder.get_object('label13')
+            #label.set_alignment(0.10, 0.10)
+            #label.set_text(ws)
+            t = ws.split('\n\n')
+
+            
+            #vbox = self.builder.get_object('vbox13')
+            #children = vbox.get_children()
+            #for i in children:
+            #    vbox.remove(i)
+            #print t
+            for i in t:
+                if not i.startswith(' '):
+                    frame = gtk.Frame('')
+                    sub_vbox = gtk.VBox()
+                    sub_vbox.show()
+                    frame.show()
+                    frame.add(sub_vbox)
+                    #label = gtk.Label(i)
+                    #label.set_alignment(0.05, 0.1)
+                    #label.show()
+                    #frame.add(label)
+                    s = i.split('\n')
+                    #print s
+                    for j in s:
+                        """
+                        if j.startswith('   {'):
+                            hbox = gtk.HBox()
+                            hbox.show()
+                            label = gtk.Label('   ')
+                            label.show()
+                            hbox.pack_start(label, False)
+                            event = gtk.EventBox()
+                            event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#5C97BF'))
+                            label = gtk.Label('')
+                            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+                            label.set_alignment(0, 0)
+                            label.set_selectable(True)
+                            label.show()
+                            event.add(label)
+                            event.show()
+                            vbox.pack_start(event, padding=5)"""
+                        if j==u'' or j.find('            ')>=0:
+                            pass
+                        elif not j.startswith(' ') and j.strip()!='':
+                            #print [j[0:5]]
+                            type = j.split(',')[1].split('[')[0]
+                            #print type
+                            label = gtk.Label()
+                            label.set_markup('<b>'+type+'</b>')
+                            label.set_alignment(0, 0)
+                            label.show()
+                            ws_table.attach(label, 0, 1, k, k+1, xoptions = gtk.FILL)
+                            frame = gtk.Frame()
+                            frame.set_shadow_type(gtk.SHADOW_OUT)
+                            frame.show()
+                            ws_table.attach(frame, 1, 2, k, k+1)
+                            vbox = gtk.VBox()
+                            vbox.show()
+                            
+                            ws_table.set_row_spacing(k,10)
+                            ws_table.set_col_spacing(0,5)
+                            k = k + 1
+                            event = gtk.EventBox()
+                            event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
+                            event.show()
+                            label = gtk.Label('')
+                            label.set_alignment(0, 0)
+                            label.set_selectable(True)
+                            label.show()
+                            event.add(vbox)
+                            frame.add(event)
+                            vbox.pack_start(label)
+                            #print vbox
+                        elif j.startswith('  '):
+                            try:
+                                if j.strip()[0].isdigit():
+                                    
+                                    hbox = gtk.HBox()
+                                    hbox.show()
+                                    
+                                    label = gtk.Label('  ')
+                                    label.show()
+                                    hbox.pack_start(label, False)
+                                    
+                                    label = gtk.Label()
+                                    label.show()
+                                    label.set_alignment(0, 0)
+                                    label.set_selectable(True)
+                                    event = gtk.EventBox()
+                                    event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#7EB8DC'))
+                                    event.show()
+                                    label = gtk.Label('')
+                                    label.set_alignment(0, 0)
+                                    label.set_selectable(True)
+                                    label.show()
+                                    event.add(label)
+                                    
+                                    hbox.pack_start(event)
+                                    vbox.pack_start(hbox,padding = 5)
+                                    #sub_vbox.pack_start(event, padding=5)
+                            except:
+                                pass
+                        if j!=u'':
+                            label.set_text(label.get_text()+'\n'+j)
+                    self.vbox13.pack_start(frame, padding=5)
             self.builder.get_object('look_webster').set_sensitive(False)
-            label = self.builder.get_object('label13')
-            label.set_alignment(0.10, 0.10)
-            label.set_text(ws)
+            #label = self.builder.get_object('label13')
+            #label.set_alignment(0.10, 0.10)
+            #label.set_text(ws)
         else:
             self.builder.get_object('look_webster').set_sensitive(True)
             label = self.builder.get_object('label13')

@@ -729,18 +729,31 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScrolledWindow" id="scrolledwindow6">
+                                      <object class="GtkScrolledWindow" id="scrolledwindow7">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="hscrollbar_policy">automatic</property>
                                         <property name="vscrollbar_policy">automatic</property>
                                         <child>
-                                          <object class="GtkViewport" id="viewport5">
+                                          <object class="GtkViewport" id="viewport6">
                                             <property name="visible">True</property>
                                             <property name="resize_mode">queue</property>
                                             <child>
-                                              <object class="GtkLabel" id="label13">
+                                              <object class="GtkHBox" id="hbox12">
                                                 <property name="visible">True</property>
+                                                <child>
+                                                  <object class="GtkVBox" id="vbox13">
+                                                    <property name="visible">True</property>
+                                                    <property name="orientation">vertical</property>
+                                                    <child>
+                                                      <placeholder/>
+                                                    </child>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="padding">5</property>
+                                                    <property name="position">0</property>
+                                                  </packing>
+                                                </child>
                                               </object>
                                             </child>
                                           </object>
@@ -749,9 +762,6 @@
                                       <packing>
                                         <property name="position">1</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                   <packing>
