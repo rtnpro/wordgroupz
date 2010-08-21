@@ -1,0 +1,2 @@
+Bugs:
+    1. If wiktionary page doesn't have 'Contents' list, get_fields.py fails to get self.contents and hence it fails for words like 'ghettoize'
