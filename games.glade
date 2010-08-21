@@ -116,10 +116,22 @@
                                           <object class="GtkEventBox" id="eventbox10">
                                             <property name="visible">True</property>
                                             <child>
-                                              <object class="GtkLabel" id="label24">
+                                              <object class="GtkVBox" id="vbox4">
                                                 <property name="visible">True</property>
-                                                <property name="wrap">True</property>
-                                                <property name="wrap_mode">word-char</property>
+                                                <property name="orientation">vertical</property>
+                                                <child>
+                                                  <object class="GtkLabel" id="label24">
+                                                    <property name="visible">True</property>
+                                                    <property name="wrap">True</property>
+                                                    <property name="wrap_mode">word-char</property>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="position">0</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <placeholder/>
+                                                </child>
                                               </object>
                                             </child>
                                           </object>

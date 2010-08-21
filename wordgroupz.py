@@ -897,6 +897,34 @@ class wordzGui:
     def on_mcq_clicked(self, widget=None, event=None):
         self.window.hide()
         game = games.mcq()
+        self.treestore.clear()
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        c.execute("""select word, accuracy from word_groups""")
+        l = c.fetchall()
+        #print 'l', l
+        c.close()
+        self.acc_dict = {}
+        for i in l:
+            if i[1] == u'0:0':
+                self.acc_dict[i] = 'N/A'
+            else:
+                t = i[1].split(':')
+                acc = float(t[0])/float(t[1])*100
+                acc = int(acc)
+                self.acc_dict[i[0]] = acc
+        #print self.acc_dict
+        for group in wordz_db.list_groups():
+            l = wordz_db.list_words_per_group(group)
+            t = 0
+            count = 0
+            for i in l:
+                t = t + self.acc_dict[i]
+                count = count + 1
+            t = t/count
+            piter = self.treestore.append(None, [group,t])
+            for word in wordz_db.list_words_per_group(group):
+                self.treestore.append(piter, [word,self.acc_dict[word]])
         self.window.show()
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
