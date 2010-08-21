@@ -885,7 +885,8 @@ class wordzGui:
         self.vbox8 = self.builder.get_object('vbox8')
         self.vbox13 = self.builder.get_object('vbox13')
         #self.vbox12.set_spacing(10)
-    
+        self.delete_b = self.builder.get_object('delete')
+        self.play_b = self.builder.get_object('speak')
     def on_flash_card_clicked(self, widget=None, event=None):
         self.window.hide()
         game = games.flash()
@@ -1062,7 +1063,7 @@ class wordzGui:
         #print wiki_txt
         wordz_db.save_wiktionary(self.tree_value, wiki_txt)
         #print wordz_db.get_dict_data('wiktionary', self.tree_value)
-        self.show_details_tree()
+        self.show_details_tree() 
 
         
     def on_lookup_wiki_clicked(self, widget=None,event=None):
@@ -1119,6 +1120,8 @@ class wordzGui:
             self.show_details_tree()"""
         #self.show_details_tree()
         #self.show_details_tree()
+        if page_num == 0:
+            self.show_details_tree()
     def on_notebook2_switch_page(self, notebook, page, page_num):
         if page_num == 0:
             self.show_details_tree()
@@ -1139,7 +1142,7 @@ class wordzGui:
         for group in wordz_db.list_groups():
             for i in wordz_db.list_words_per_group(group):
                 if i.startswith(search_txt):
-                    piter = self.treestore.append(None, [i])
+                    piter = self.treestore.append(None, [i, self.acc_dict[i]])
                 
                     #for word in wordz_db.list_words_per_group(group):
                     #    self.treestore.append(piter, [word])
@@ -1148,8 +1151,6 @@ class wordzGui:
         self.model, self.iter = self.selection.get_selected()
         self.frame2.show()
         if self.iter is not None:
-            self.delete_b = self.builder.get_object('delete')
-            self.play_b = self.builder.get_object('speak')
             self.delete_b.set_sensitive(True)
             self.play_b.set_sensitive(True)
             if self.welcome is self.hbox2.get_children()[1]:
@@ -1681,9 +1682,16 @@ class wordzGui:
         self.treestore.clear()
         #self.search.set_text('')
         for group in wordz_db.list_groups():
-            piter = self.treestore.append(None, [group])
+            l = wordz_db.list_words_per_group(group)
+            t = 0
+            count = 0
+            for i in l:
+                t = t + self.acc_dict[i]
+                count = count + 1
+            t = t/count
+            piter = self.treestore.append(None, [group, t])
             for word in wordz_db.list_words_per_group(group):
-                self.treestore.append(piter, [word])
+                self.treestore.append(piter, [word, self.acc_dict[word]])
         self.treeview.expand_all()
         #buff = self.output_txtview.get_buffer()
         #buff.set_text('Nothing selected')
