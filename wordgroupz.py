@@ -925,6 +925,7 @@ class wordzGui:
             piter = self.treestore.append(None, [group,t])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word,self.acc_dict[word]])
+        self.treeview.expand_all()
         self.window.show()
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'

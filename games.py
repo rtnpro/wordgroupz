@@ -53,6 +53,19 @@ class games_GUI:
         self.question = self.builder.get_object('label6')
         self.option=[]
         self.option0 = self.builder.get_object('option0')
+        self.accuracy = self.get_accuracy_table()
+        accuracy = {}
+        for i in self.accuracy.keys():
+            if self.accuracy[i][1]!=0:
+                val = float(self.accuracy[i][0])/self.accuracy[i][1]
+            else:
+                val = 0
+            accuracy[i] = val
+        accuracy_ = []
+        for key, value in sorted(accuracy.iteritems(), key=lambda (k,v): (v,k)):
+            accuracy_.append(key)
+        
+        self.sorted_accuracy_list = accuracy_
         self.res = ''
         for i in range(1,5):
             self.option.append(self.builder.get_object('option'+str(i)))
@@ -62,7 +75,7 @@ class games_GUI:
         self.proceed_b = self.builder.get_object('proceed')
         self.proceed_b.set_sensitive(False)
         #self.builder.get_object('scrolledwindow2').show()
-        self.accuracy = self.get_accuracy_table()
+
         #menu - flash games
         self.game_mode = self.builder.get_object('game_mode')
         self.game_mode_sub = gtk.Menu()
@@ -97,7 +110,8 @@ class games_GUI:
         self.review_data = []
         
     def set_up_mcq(self):
-        d = self.mcq_dict.keys()
+        #d = self.mcq_dict.keys()
+        d = self.sorted_accuracy_list[0:10]
         random.shuffle(d)
         self.ques = {}
         for i in d:
