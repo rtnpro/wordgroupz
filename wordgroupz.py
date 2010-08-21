@@ -676,9 +676,6 @@ class wordzGui:
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         #self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
-        #pango
-        self.fontdesc = pango.FontDescription("Purisa 10")
-        #self.output_txtview.modify_font(self.fontdesc)
         for x in wordz_db.list_groups():
             self.get_group.append_text(x)
         self.table1 = self.builder.get_object("table1")
@@ -762,9 +759,9 @@ class wordzGui:
         self.hbox5.pack_start(self.chose_dict, False, True, padding = 5)"""
         
         #webkit in scrolledwindow4
-        self.web_vbox = gtk.VBox()
-        self.scroller = gtk.ScrolledWindow()
-        self.scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.web_vbox = self.builder.get_object('vbox14')
+        #self.scroller = gtk.ScrolledWindow()
+        #self.scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.browser = WebView()
         #self.browser.settings.enable_universal_access_from_file_uris(True)
         self.settings = self.browser.get_settings()
@@ -773,10 +770,10 @@ class wordzGui:
         self.settings.set_property('user-stylesheet-uri', 'http://rtnpro.fedorapeople.org/main.css')
         self.settings.set_property('enable-universal-access-from-file-uris', True)
         self.browser.set_settings(self.settings)
-        self.browser.show()
-        self.scroller.add(self.browser)
-        self.web_vbox.pack_start(self.scroller)
-        self.scroller.show()
+        #self.browser.show()
+        #self.scroller.add(self.browser)
+        #self.web_vbox.pack_start(self.scroller)
+        #self.scroller.show()
         self.progress = gtk.ProgressBar()
         self.progress.hide()
         self.browser.connect("load-progress-changed", self.load_progress_changed)
@@ -785,14 +782,14 @@ class wordzGui:
         #self.browser.connect('navigation-requested', self._navigation_requested_cb)
         self.web_vbox.pack_start(self.progress, False)
         
-        self.vbox9 = self.builder.get_object('vbox9')
-        self.vbox9.pack_start(self.web_vbox)
-        self.web_vbox.show()
-        self.vbox9.show()
+        #self.vbox9 = self.builder.get_object('vbox9')
+        #self.vbox9.pack_start(self.web_vbox)
+        #self.web_vbox.show()
+        #self.vbox9.show()
         #self.status_label = self.builder.get_object('label9')
         #self.status_label.hide()
-        self.save_audio = self.builder.get_object('save_audio')
-        self.save_audio.set_label('Download pronunciation')
+        #self.save_audio = self.builder.get_object('save_audio')
+        #self.save_audio.set_label('Download pronunciation')
         self.vbox7 = self.builder.get_object('vbox7')
         self.hbox2 = self.builder.get_object('hbox2')
         self.welcome = self.builder.get_object('frame3')
@@ -994,7 +991,7 @@ class wordzGui:
 
     def load_started(self, webview, frame):
         self.progress.set_visible(True)
-        self.save_audio.set_sensitive(False)
+        #self.save_audio.set_sensitive(False)
         self.browser_load_status='started'
 
     def load_finished(self, webview, frame):
@@ -1004,11 +1001,6 @@ class wordzGui:
         #self.status_label.set_text('') 
         
         self.browser_load_status = 'finished'
-        if self.audio_found == True:
-            self.save_audio.set_sensitive(True)
-        else:
-            pass
-            
         if self.count == 0:
             self.count = 1
         else:
@@ -1038,9 +1030,10 @@ class wordzGui:
                     #print self.download_url
                     self.wiki_word = str(soup.html.title).split(' ')[0].split('>')[1]
                     #print 'wiki_word'+self.wiki_word
-                    self.save_audio.set_sensitive(True)
+                    #self.save_audio.set_sensitive(True)
                     self.audio_file = self.tree_value+'.ogg'
                     self.audio_found = True
+                    self.on_save_audio_clicked()
                     #print self.audio_file
                     
         self.audio_checked = True
@@ -1053,7 +1046,7 @@ class wordzGui:
         self.tmp = tmp
         #self.status_label.set_text('Loading content...')
         self.browser.load_string(tmp, "text/html", "utf-8", self.url)
-        self.browser.show()
+        #self.browser.show()
         txt_html = html2text(tmp, self.url)
         #file = open('tmp','w')
         #file.write(txt_html)
@@ -1124,10 +1117,8 @@ class wordzGui:
                 #self.on_lookup_wiki_clicked()'''
         elif page_num == 0:
             self.show_details_tree()"""
-        self.show_details_tree()
-        if page_num == 2:
-            print 'Hello'
-            self.show_details_tree()
+        #self.show_details_tree()
+        #self.show_details_tree()
     def on_notebook2_switch_page(self, notebook, page, page_num):
         if page_num == 0:
             self.show_details_tree()
@@ -1169,15 +1160,8 @@ class wordzGui:
             #print self.tree_value
             self.selected_word.show()
             self.selected_word.set_text(self.tree_value)
-            self.notebook2 = self.builder.get_object('notebook2')
-            cur_page = self.notebook2.get_current_page()
-            if cur_page is 1:
-                #self.url = ('http://en.wiktionary.org/wiki/'+self.tree_value)
-                #self.browser.open(self.url)
-                self.on_lookup_wiki_clicked()
-                #self.get_audio()
-                pass
-
+            #self.notebook2 = self.builder.get_object('notebook2')
+            #cur_page = self.notebook2.get_current_page()
             #if self.tree_value not in wordz_db.list_groups():
             #print self.tree_value
             self.hbox5.show()
@@ -1190,13 +1174,13 @@ class wordzGui:
                 self.vpan.set_position(10000)
                 self.hbox3.hide()'''
             
-            if self.output_txtview.get_editable():
-                self.output_txtview.set_editable(False)
+            #if self.output_txtview.get_editable():
+            #    self.output_txtview.set_editable(False)
             detail = wordz_db.get_details(self.tree_value)
             buff = self.output_txtview.get_buffer()
             buff.set_text(detail)
             self.output_txtview.set_buffer(buff)
-            self.output_txtview.modify_font(self.fontdesc)
+            #self.output_txtview.modify_font(self.fontdesc)
             self.show_details_tree()
 
     def show_details_tree(self):
@@ -1473,7 +1457,6 @@ class wordzGui:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
 
         if ws != u'':
-            print ws
             ws_table = gtk.Table(columns=2)
             ws_table.show()
             self.vbox13.pack_start(ws_table, False, padding = 5)
@@ -1524,10 +1507,16 @@ class wordzGui:
                             pass
                         elif not j.startswith(' ') and j.strip()!='':
                             #print [j[0:5]]
-                            type = j.split(',')[1].split('[')[0]
+                            try:
+                                type = j.split(',')[1].split('[')[0]
+                            except:
+                                pass
                             #print type
                             label = gtk.Label()
-                            label.set_markup('<b>'+type+'</b>')
+                            try:
+                                label.set_markup('<b>'+type+'</b>')
+                            except:
+                                pass
                             label.set_alignment(0, 0)
                             label.show()
                             ws_table.attach(label, 0, 1, k, k+1, xoptions = gtk.FILL)
@@ -1541,16 +1530,16 @@ class wordzGui:
                             ws_table.set_row_spacing(k,10)
                             ws_table.set_col_spacing(0,5)
                             k = k + 1
-                            event = gtk.EventBox()
-                            event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
-                            event.show()
+                            #event = gtk.EventBox()
+                            #event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
+                            #event.show()
                             label = gtk.Label('')
                             label.set_alignment(0, 0)
-                            label.set_selectable(True)
+                            #label.set_selectable(True)
                             label.show()
-                            event.add(vbox)
-                            frame.add(event)
-                            vbox.pack_start(label)
+                            #event.add(vbox)
+                            frame.add(vbox)
+                            vbox.pack_start(label, False)
                             #print vbox
                         elif j.startswith('  '):
                             try:
@@ -1559,40 +1548,49 @@ class wordzGui:
                                     hbox = gtk.HBox()
                                     hbox.show()
                                     
-                                    label = gtk.Label('  ')
+                                    label = gtk.Label(' '*10)
                                     label.show()
                                     hbox.pack_start(label, False)
                                     
                                     label = gtk.Label()
                                     label.show()
                                     label.set_alignment(0, 0)
-                                    label.set_selectable(True)
+                                    #label.set_selectable(True)
                                     event = gtk.EventBox()
-                                    event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#7EB8DC'))
+                                    event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
                                     event.show()
                                     label = gtk.Label('')
                                     label.set_alignment(0, 0)
-                                    label.set_selectable(True)
+                                    #label.set_selectable(True)
                                     label.show()
                                     event.add(label)
-                                    
-                                    hbox.pack_start(event)
+                                    frame = gtk.Frame()
+                                    frame.add(event)
+                                    frame.set_shadow_type(gtk.SHADOW_OUT)
+                                    frame.show()
+                                    hbox.pack_start(frame)
                                     vbox.pack_start(hbox,padding = 5)
                                     #sub_vbox.pack_start(event, padding=5)
                             except:
                                 pass
                         if j!=u'':
                             label.set_text(label.get_text()+'\n'+j)
-                    self.vbox13.pack_start(frame, padding=5)
+                    #self.vbox13.pack_start(frame, padding=5)
+                    self.vbox13.show_all()
             self.builder.get_object('look_webster').set_sensitive(False)
             #label = self.builder.get_object('label13')
             #label.set_alignment(0.10, 0.10)
             #label.set_text(ws)
         else:
             self.builder.get_object('look_webster').set_sensitive(True)
-            label = self.builder.get_object('label13')
-            label.set_alignment(0.10, 0.10)
+            label = gtk.Label()
+            label.show()
+            try:
+                label.set_alignment(0.10, 0.10)
+            except:
+                pass
             label.set_text('Webster definition not in database,\nPlease click on "Look up"')
+            self.vbox13.pack_start(label, False)
 
     def on_delete_clicked(self, widget=None, event=None):
         if self.tree_value in wordz_db.list_groups():
@@ -1623,7 +1621,7 @@ class wordzGui:
         end = buff.get_iter_at_offset(-1)
         new_details = buff.get_text(start, end)
         wordz_db.update_details(self.tree_value, new_details)
-        self.output_txtview.set_editable(False)
+        #self.output_txtview.set_editable(False)
 
     def item_list_changed(self, widget=None, event=None):
         key = gtk.gdk.keyval_name(event.keyval)
