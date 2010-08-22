@@ -28,7 +28,6 @@ from BeautifulSoup import BeautifulSoup
 import urllib
 import pygst
 import gst
-import pango
 import re
 from html2text import *
 import get_fields
@@ -36,9 +35,9 @@ import thread
 import threading
 import games
 import espeak
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar
+#import numpy as np
+#import matplotlib.pyplot as plt
+#from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar
 
 def threaded(f):
     def wrapper(*args):
@@ -1808,6 +1807,8 @@ class wordzGui:
         self.builder.get_object('look_webster').set_sensitive(True)
 
     def on_show_stats_clicked(self, widget=None, event=None):
+        pass
+        '''
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
@@ -1862,7 +1863,7 @@ class wordzGui:
         #vbox.pack_start(scroller)
         canvas.show()
         graphwin.add(scroller)
-        graphwin.show_all()
+        graphwin.show_all()'''
 if __name__ == "__main__":
     wordz_db=wordGroupzSql()
     wordz_db.db_init()

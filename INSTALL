@@ -10,4 +10,4 @@ pywebkitgtk
 urllib2
 python-BeautifulSoup
 gstreamer-python
-python-matplotlib
+espeak
