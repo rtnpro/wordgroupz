@@ -446,7 +446,8 @@ class games_GUI:
             self.proceed()
 
     def on_window_destroy(self, widget=None, event=None):
-        gtk.main_quit()
+        self.dialog.destroy()
+        #gtk.main_quit()
 
     def on_entry1_changed(self, widget=None, event=None):
         str_count = self.entry1.get_text()
@@ -479,13 +480,13 @@ class games_GUI:
                 
     def on_dialog_proceed_clicked(self, widget=None, event=None):
         self.no_of_ques = self.count_
-        self.dialog.destroy()
+        self.dialog.hide()
         self.set_up_mcq()
         self.builder.get_object('window3').show()
         
     def on_dialog_destroy(self, widget=None, event=None):
         self.dialog.destroy()
-        #gtk.main_quit()
+        gtk.main_quit()
         
     def show_question_num_dialog(self):
         self.dialog_proceed = self.builder.get_object('choice_button')
@@ -560,6 +561,7 @@ class games_GUI:
             label.set_markup('<span foreground="white">Custom</span>')
             self.entry1.set_visible(True)
             self.dialog.show()
+        
             
 def flash():
     global db
