@@ -716,6 +716,7 @@ class wordzGui:
                     self.treestore.append(piter, [word,self.acc_dict[word]])
                 except:
                     self.treestore.append(piter, [word,'n/a'])"""
+        
         self.treeview = gtk.TreeView(self.treestore)
         self.tvcolumn = gtk.TreeViewColumn('Word Groups')
         self.tvcolumn1 = gtk.TreeViewColumn('Accuracy')
@@ -740,8 +741,15 @@ class wordzGui:
         self.treeview.set_tooltip_text("Shows words classified in groups")
         self.treeview.show()
         self.treeview.expand_all()
-        self.scrolledwindow2 = self.builder.get_object("scrolledwindow2")
-        self.scrolledwindow2.add_with_viewport(self.treeview)
+        #self.scrolledwindow2 = self.builder.get_object("scrolledwindow2")
+        #self.scrolledwindow2.add_with_viewport(self.treeview)
+        self.scrolledwindow2 = gtk.ScrolledWindow()
+        self.scrolledwindow2.add(self.treeview)
+        self.scrolledwindow2.show()
+        #print self.scrolledwindow2.get_policy()
+        self.scrolledwindow2.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.vbox6 = self.builder.get_object('vbox6')
+        self.vbox6.pack_start(self.scrolledwindow2)
         
         self.search=self.builder.get_object("search")
         #self.search.connect('changed',self.on_search_changed)
