@@ -70,8 +70,8 @@ class games_GUI:
         for i in range(1,5):
             self.option.append(self.builder.get_object('option'+str(i)))
         self.mcq_dict = self.get_mcq_data()
-        self.set_up_mcq()
-        self.builder.get_object('label9').set_text(str(len(self.ques.keys())))
+        #self.set_up_mcq()
+        #self.builder.get_object('label9').set_text(str(len(self.ques.keys())))
         self.proceed_b = self.builder.get_object('proceed')
         self.proceed_b.set_sensitive(False)
         #self.builder.get_object('scrolledwindow2').show()
@@ -111,7 +111,7 @@ class games_GUI:
         
     def set_up_mcq(self):
         #d = self.mcq_dict.keys()
-        d = self.sorted_accuracy_list[0:10]
+        d = self.sorted_accuracy_list[0:self.no_of_ques]
         random.shuffle(d)
         self.ques = {}
         for i in d:
@@ -135,11 +135,13 @@ class games_GUI:
         self.question.set_markup('<big><big><b>'+self.ques.keys()[0]+'</b></big></big>')
         j=0
         for i in self.option:
-            
-            i.set_label(self.ques[self.question.get_text()][j])
-            label = i.get_child()
-            label.set_line_wrap(True)
-            j = j+1
+            try:
+                i.set_label(self.ques[self.question.get_text()][j])
+                label = i.get_child()
+                label.set_line_wrap(True)
+                j = j+1
+            except:
+                print 'Not enough questions'
         self.mcq_count = 0
         self.response = []
         self.ans = []
@@ -151,6 +153,7 @@ class games_GUI:
                         self.ans.append([j,index])
         self.mcq_correct = 0
         self.mcq_incorrect = 0
+        self.builder.get_object('label9').set_text(str(len(self.ques.keys())))
     def save_accuracy(self):
         tmp =[]
         for i in self.accuracy[self.ques.keys()[self.mcq_count]]:
@@ -187,12 +190,13 @@ class games_GUI:
 
                 j = 0
                 for i in self.option:
-
-                    i.set_label(self.ques[self.question.get_text()][j])
-                    label = i.get_child()
-                    label.set_line_wrap(True)
-                    j = j+1
-
+                    try:
+                        i.set_label(self.ques[self.question.get_text()][j])
+                        label = i.get_child()
+                        label.set_line_wrap(True)
+                        j = j+1
+                    except:
+                        print 'Not enough questions'
 
         else:
             if self.res[0] != '':
@@ -443,10 +447,125 @@ class games_GUI:
 
     def on_window_destroy(self, widget=None, event=None):
         gtk.main_quit()
+
+    def on_entry1_changed(self, widget=None, event=None):
+        str_count = self.entry1.get_text()
+        if str_count.isdigit():
+            self.count_ = int(str_count)
+            if self.count_ > len(self.get_accuracy_table()):
+                self.count_ = len(self.get_accuracy_table())
+            self.dialog_proceed.set_sensitive(True)
+        else:
+            self.dialog_proceed.set_sensitive(False)
+    def on_dialog_choice_toggled(self, widget=None, event=None):
+        for i in [self.choice1, self.choice2, self.choice3, self.choice4]:
+            if i.get_active():
+                choice = i.get_child().get_text()
+        if choice != 'Custom':
+            self.dialog_proceed.set_sensitive(True)
+            count = int(choice)
+            self.entry1.set_editable(False)
+            self.count_ = count
+        else:
+            if not self.entry1.get_text().isdigit():
+                self.dialog_proceed.set_sensitive(False)
+            else:
+                self.dialog_proceed.set_sensitive(True)
+                self.count_ = int(self.entry1.get_text())
+                if self.count_ > len(self.get_accuracy_table()):
+                    self.count_ = len(self.get_accuracy_table())
+            self.entry1.set_editable(True)
+        
+                
+    def on_dialog_proceed_clicked(self, widget=None, event=None):
+        self.no_of_ques = self.count_
+        self.dialog.destroy()
+        self.set_up_mcq()
+        self.builder.get_object('window3').show()
+        
+    def on_dialog_destroy(self, widget=None, event=None):
+        self.dialog.destroy()
+        #gtk.main_quit()
+        
+    def show_question_num_dialog(self):
+        self.dialog_proceed = self.builder.get_object('choice_button')
+        self.dialog = self.builder.get_object('dialog1')
+        self.choice1 = self.builder.get_object('choice1')
+        self.choice2 = self.builder.get_object('choice2')
+        self.choice3 = self.builder.get_object('choice3')
+        self.choice4 = self.builder.get_object('choice4')
+        self.entry1 = self.builder.get_object('entry1')
+        accuracy = self.get_accuracy_table()
+        eventbox2 = self.builder.get_object('eventbox2')
+        eventbox2.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#444444"))
+        vbox = self.builder.get_object('vbox10')
+        count = len(accuracy)
+        if count <10:
+            self.no_of_ques = count
+            self.set_up_mcq()
+            self.builder.get_object('window3').show()
+        elif count >= 10 and count < 20:
+            self.count_ = 10
+            self.choice1.set_visible(True)
+            label = self.choice1.get_child()
+            label.set_markup('<span foreground="white">10</span>')
+            
+            self.choice2.set_visible(True)
+            label = self.choice2.get_child()
+            label.set_markup('<span foreground="white">'+str(count)+'</span>')
+
+            vbox.remove(self.choice3)
+            
+            self.choice4.set_visible(True)
+            label = self.choice4.get_child()
+            label.set_markup('<span foreground="white">Custom</span>')
+
+            self.entry1.set_visible(True)
+            self.dialog.show()
+        elif 20<=count<30:
+            self.count_ = 10
+            self.choice1.set_visible(True)
+            label = self.choice1.get_child()
+            label.set_markup('<span foreground="white">10</span>')
+
+            self.choice2.set_visible(True)
+            label = self.choice2.get_child()
+            label.set_markup('<span foreground="white">20</span>')
+
+            self.choice3.set_visible(True)
+            label = self.choice3.get_child()
+            label.set_markup('<span foreground="white">'+str(count)+'</span>')
+
+            self.choice4.set_visible(True)
+            label = self.choice4.get_child()
+            label.set_markup('<span foreground="white">Custom</span>')
+            self.entry1.set_visible(True)
+            self.dialog.show()
+        else:
+            self.count_ = 10
+            self.choice1.set_visible(True)
+            label = self.choice1.get_child()
+            label.set_markup('<span foreground="white">10</span>')
+
+            self.choice2.set_visible(True)
+            label = self.choice2.get_child()
+            label.set_markup('<span foreground="white">20</span>')
+
+            self.choice3.set_visible(True)
+            label = self.choice3.get_child()
+            label.set_markup('<span foreground="white">30</span>')
+
+            self.choice4.set_visible(True)
+            label = self.choice4.get_child()
+            label.set_markup('<span foreground="white">Custom</span>')
+            self.entry1.set_visible(True)
+            self.dialog.show()
+            
 def flash():
     global db
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
+    
     g.builder.get_object('window2').show()
     g.builder.get_object('window2').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     #wordgroupz.win.window.hide()
@@ -456,7 +575,9 @@ def mcq():
     global db
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
-    g.builder.get_object('window3').show()
+    g.show_question_num_dialog()
+    #g.set_up_mcq()
+    #g.builder.get_object('window3').show()
     g.builder.get_object('window3').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     gtk.main()
     
