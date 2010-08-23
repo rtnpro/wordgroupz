@@ -90,7 +90,7 @@ class get_def_thread(threading.Thread):
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 audio_file_path = wordgroupz_dir + '/audio'
-db_file_path = wordgroupz_dir+'/wordz'
+db_file_path = wordgroupz_dir+'/wordgroupz.db'
 
 class wordGroupzSql:
     def db_init(self):
@@ -201,7 +201,7 @@ class wordGroupzSql:
             conn.commit()
         #allow words with no groups to be added
         elif 'no-category' not in self.list_groups() and grp is '':
-            c.execute("""insert into groups values ('no-category','Uncategorized words')""")
+            c.execute("""insert into groups values ('no-category','Uncategorized words', '', '', '')""")
         if word is not '' and word not in self.list_words_per_group(grp):
             if grp == '':
                 grp = 'no-category'
@@ -726,9 +726,13 @@ class wordzGui:
             t = 0
             count = 0
             for i in l:
-                t = t + self.acc_dict[i]
-                count = count + 1
-            t = t/count
+                if i not in self.new_word:
+                    t = t + self.acc_dict[i]
+                    count = count + 1
+            if count != 0:
+                t = t/count
+            else:
+                t = 0
             piter = self.treestore.append(None, [group,t])
 
             #self.cellpb.hide()
@@ -930,8 +934,10 @@ class wordzGui:
     def custom_tree_col_view(self, column, renderer, model, iter, data):
         word = model.get_value(iter, 0)
         for i in data:
-            if i[0] == word and i[1] == '0:0':
+            if i[0] == word and i[1] == '0:0' and word not in self.new_word:
                 self.new_word.append(word)
+            elif i[1] != '0:0' and i[1] in self.new_word:
+                self.new_word.remove(i[0])
         if  word in self.new_word:
             renderer.set_property('text', 'New')
         else:
@@ -1732,6 +1738,10 @@ class wordzGui:
         wordz_db.add_to_db(word, group, detail)
         self.refresh_groups(group)
         self.treestore.clear()
+        self.new_word.append(word)
+        if word not in self.new_word:
+            self.new_word.append(word)
+        print self.new_word
         self.on_back_clicked()
 
     def item_list_changed(self, widget=None, event=None):
