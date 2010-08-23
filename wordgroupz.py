@@ -673,6 +673,8 @@ class wordzGui:
         self.eventbox1 = self.builder.get_object('eventbox1')
         self.eventbox1.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
         self.get_group.child.connect('key-press-event',self.item_list_changed)
+        self.frame2 = self.builder.get_object('frame2')
+        self.frame2.hide()
         #self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
         for x in wordz_db.list_groups():
@@ -684,22 +686,23 @@ class wordzGui:
         self.hbox5 = self.builder.get_object("hbox5")
         self.hbox5.hide()
         self.treestore = gtk.TreeStore(str, int)
+        self.new_word = []
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
-        l = c.fetchall()
-        #print 'l', l
+        ls = c.fetchall()
+        #print 'l', ls
         c.close()
         self.acc_dict = {}
-        for i in l:
+        for i in ls:
             if i[1] == u'0:0':
-                self.acc_dict[i] = 'N/A'
+                self.acc_dict[i[0]] = 0
             else:
                 t = i[1].split(':')
                 acc = float(t[0])/float(t[1])*100
                 acc = int(acc)
                 self.acc_dict[i[0]] = acc
-        #print self.acc_dict
+        #print self.acc_dict.keys()
         for group in wordz_db.list_groups():
             l = wordz_db.list_words_per_group(group)
             t = 0
@@ -709,15 +712,21 @@ class wordzGui:
                 count = count + 1
             t = t/count
             piter = self.treestore.append(None, [group,t])
+
+            #self.cellpb.hide()
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word,self.acc_dict[word]])
+                #self.cellpb.set_property('text', None)
+                if self.acc_dict[word] == 0:
+                    #self.cellpb.set_property('text', 'New')
+                    pass
                 """
                 try:
                     self.treestore.append(piter, [word,self.acc_dict[word]])
                 except:
                     self.treestore.append(piter, [word,'n/a'])"""
-        
-        self.treeview = gtk.TreeView(self.treestore)
+
+        self.treeview = gtk.TreeView()
         self.tvcolumn = gtk.TreeViewColumn('Word Groups')
         self.tvcolumn1 = gtk.TreeViewColumn('Accuracy')
         self.treeview.append_column(self.tvcolumn)
@@ -731,6 +740,9 @@ class wordzGui:
         self.tvcolumn1.pack_start(self.cellpb, True)
         #self.tvcolumn.pack_start(self.cell1, True)
         self.tvcolumn1.add_attribute(self.cellpb, 'value', 1)
+        self.cellpb.set_property('text', None)
+        self.tvcolumn1.set_cell_data_func(self.cellpb, self.custom_tree_col_view, ls)
+        
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(False)
@@ -739,8 +751,10 @@ class wordzGui:
         self.selection = self.treeview.get_selection()
         self.selection.connect('changed', self.tree_select_changed)
         self.treeview.set_tooltip_text("Shows words classified in groups")
+        self.treeview.set_model(self.treestore)
         self.treeview.show()
         self.treeview.expand_all()
+        
         #self.scrolledwindow2 = self.builder.get_object("scrolledwindow2")
         #self.scrolledwindow2.add_with_viewport(self.treeview)
         self.scrolledwindow2 = gtk.ScrolledWindow()
@@ -800,7 +814,7 @@ class wordzGui:
         self.vbox7 = self.builder.get_object('vbox7')
         self.hbox2 = self.builder.get_object('hbox2')
         self.welcome = self.builder.get_object('frame3')
-        self.frame2 = self.builder.get_object('frame2')
+        
         self.frame2.hide()
         #self.hbox2.pack_start(self.welcome)
         self.welcome.show()
@@ -894,6 +908,18 @@ class wordzGui:
         #self.vbox12.set_spacing(10)
         self.delete_b = self.builder.get_object('delete')
         self.play_b = self.builder.get_object('speak')
+
+    def custom_tree_col_view(self, column, renderer, model, iter, data):
+        word = model.get_value(iter, 0)
+        for i in data:
+            if i[0] == word and i[1] == '0:0':
+                self.new_word.append(word)
+        if  word in self.new_word:
+            renderer.set_property('text', 'New')
+        else:
+            renderer.set_property('text', None)
+
+
     def on_flash_card_clicked(self, widget=None, event=None):
         self.window.hide()
         game = games.flash()
@@ -908,13 +934,13 @@ class wordzGui:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
-        l = c.fetchall()
+        ls = c.fetchall()
         #print 'l', l
         c.close()
         self.acc_dict = {}
-        for i in l:
+        for i in ls:
             if i[1] == u'0:0':
-                self.acc_dict[i] = 'N/A'
+                self.acc_dict[i[0]] = 0
             else:
                 t = i[1].split(':')
                 acc = float(t[0])/float(t[1])*100
@@ -926,9 +952,11 @@ class wordzGui:
             t = 0
             count = 0
             for i in l:
-                t = t + self.acc_dict[i]
-                count = count + 1
+                if i not in self.new_word:
+                    t = t + self.acc_dict[i]
+                    count = count + 1
             t = t/count
+            #print self.acc_dict.keys()
             piter = self.treestore.append(None, [group,t])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word,self.acc_dict[word]])
@@ -1717,14 +1745,40 @@ class wordzGui:
             return
         self.treestore.clear()
         #self.search.set_text('')
+        self.new_word = []
+        conn = sqlite3.connect(db_file_path)
+        c = conn.cursor()
+        c.execute("""select word, accuracy from word_groups""")
+        ls = c.fetchall()
+        #print 'l', ls
+        c.close()
+        self.acc_dict = {}
+        for i in ls:
+            if i[1] == u'0:0':
+                self.acc_dict[i[0]] = 0
+            else:
+                try:
+                    self.new_word.remove(i[0])
+                except:
+                    pass
+                t = i[1].split(':')
+                acc = float(t[0])/float(t[1])*100
+                acc = int(acc)
+                self.acc_dict[i[0]] = acc
+
         for group in wordz_db.list_groups():
             l = wordz_db.list_words_per_group(group)
             t = 0
             count = 0
             for i in l:
-                t = t + self.acc_dict[i]
-                count = count + 1
-            t = t/count
+                if i not in self.new_word:
+                    #print i
+                    t = t + self.acc_dict[i]
+                    count = count + 1
+            if count != 0:
+                t = t/count
+            else:
+                t = 0
             piter = self.treestore.append(None, [group, t])
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word, self.acc_dict[word]])

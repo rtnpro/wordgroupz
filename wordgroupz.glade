@@ -753,6 +753,7 @@
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="wrap_mode">word-char</property>
+                                                <property name="right_margin">80</property>
                                               </object>
                                             </child>
                                           </object>
