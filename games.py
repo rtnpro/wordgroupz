@@ -117,14 +117,22 @@ class games_GUI:
         for i in d:
             opts = []
             opt_keys = [i]
-            a = random.choice(self.mcq_dict[i])
+            try:
+                a = random.choice(self.mcq_dict[i])
+            except:
+                continue
             a = a[1:len(a)]
             opts.append(a)
             for j in d:
                 if j not in opt_keys:
                     #print 'j:'
                     #print j
-                    a = random.choice(self.mcq_dict[j])
+                    try:
+                        a = random.choice(self.mcq_dict[j])
+                    except:
+                        continue
+                    if a == u'':
+                        continue
                     #a = a[1:len(a)]
                     opts.append(a)
                     opt_keys.append(j)
