@@ -319,7 +319,10 @@ class games_GUI:
             self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining
         else:
             self.remaining.sort()
-            self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining.sort()
+            try:
+                self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining.sort()
+            except:
+                pass
             
     def on_opts_toggled(self, widget=None, event=None):
         j = 1
@@ -371,7 +374,7 @@ class games_GUI:
     def on_check_clicked(self, widget=None, event=None):
         if self.flash_frame.get_label() == 'word':
             label=self.flash_frame.get_label_widget()
-            label.set_text('definition')
+            label.set_markup('definition for <big>' + self.flash_data[self.current_index][0] + '</big>')
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
             try:
                 if self.flash_frame.get_label_widget!=NULL:
@@ -448,6 +451,8 @@ class games_GUI:
     def on_window_destroy(self, widget=None, event=None):
         self.dialog.destroy()
         #gtk.main_quit()
+    def on_flash_window_destroy(self, widget=None, event=None):
+        gtk.main_quit()
 
     def on_entry1_changed(self, widget=None, event=None):
         str_count = self.entry1.get_text()

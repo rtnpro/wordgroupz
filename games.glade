@@ -47,11 +47,10 @@
   </object>
   <object class="GtkWindow" id="window2">
     <property name="title" translatable="yes">wordGroupz - Flash Card</property>
-    <property name="modal">True</property>
     <property name="default_width">500</property>
     <property name="default_height">500</property>
     <property name="destroy_with_parent">True</property>
-    <signal name="destroy" handler="on_window_destroy"/>
+    <signal name="destroy" handler="on_flash_window_destroy"/>
     <child>
       <object class="GtkEventBox" id="eventbox3">
         <property name="visible">True</property>
@@ -452,13 +451,11 @@
   </object>
   <object class="GtkWindow" id="window3">
     <property name="title" translatable="yes">wordGroupz - MCQ</property>
-    <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">500</property>
     <property name="default_height">450</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">accessories-dictionary</property>
-    <property name="type_hint">dialog</property>
     <signal name="destroy" handler="on_window_destroy"/>
     <child>
       <object class="GtkEventBox" id="eventbox1">
