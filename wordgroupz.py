@@ -936,7 +936,7 @@ class wordzGui:
         for i in data:
             if i[0] == word and i[1] == '0:0' and word not in self.new_word:
                 self.new_word.append(word)
-            elif i[1] != '0:0' and i[1] in self.new_word:
+            elif i[0] != '0:0' and i[1] in self.new_word:
                 self.new_word.remove(i[0])
         if  word in self.new_word:
             renderer.set_property('text', 'New')
@@ -1741,7 +1741,7 @@ class wordzGui:
         self.new_word.append(word)
         if word not in self.new_word:
             self.new_word.append(word)
-        print self.new_word
+        #print self.new_word
         self.on_back_clicked()
 
     def item_list_changed(self, widget=None, event=None):
