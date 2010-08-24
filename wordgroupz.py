@@ -936,8 +936,9 @@ class wordzGui:
         for i in data:
             if i[0] == word and i[1] == '0:0' and word not in self.new_word:
                 self.new_word.append(word)
-            elif i[0] != '0:0' and i[1] in self.new_word:
+            elif i[1] != '0:0' and i[0] in self.new_word:
                 self.new_word.remove(i[0])
+        #print self.new_word
         if  word in self.new_word:
             renderer.set_property('text', 'New')
         else:
@@ -1729,6 +1730,9 @@ class wordzGui:
 
     def on_add_clicked(self, widget, data=None):
         word = self.get_word.get_text()
+        if word not in self.new_word and word not in wordz_db.list_words():
+            self.new_word.append(word)
+
         get_group_ch = self.get_group.child
         group = get_group_ch.get_text()
         conts = self.details.get_buffer()
@@ -1739,8 +1743,6 @@ class wordzGui:
         self.refresh_groups(group)
         self.treestore.clear()
         self.new_word.append(word)
-        if word not in self.new_word:
-            self.new_word.append(word)
         #print self.new_word
         self.on_back_clicked()
 
