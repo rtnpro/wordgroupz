@@ -936,8 +936,12 @@ class wordzGui:
         for i in data:
             if i[0] == word and i[1] == '0:0' and word not in self.new_word:
                 self.new_word.append(word)
-            elif i[1] != '0:0' and i[0] in self.new_word:
-                self.new_word.remove(i[0])
+                #print self.new_word
+            else:
+                try:
+                    self.new_word.remove(i[0])
+                except:
+                    pass
         #print self.new_word
         if  word in self.new_word:
             renderer.set_property('text', 'New')
@@ -956,12 +960,16 @@ class wordzGui:
         self.window.hide()
         game = games.mcq()
         self.treestore.clear()
+        self.on_back_clicked()
+        self.window.show()
+        '''
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
         ls = c.fetchall()
         #print 'l', l
         c.close()
+        self.new_word = []
         self.acc_dict = {}
         for i in ls:
             if i[1] == u'0:0':
@@ -989,7 +997,7 @@ class wordzGui:
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word,self.acc_dict[word]])
         self.treeview.expand_all()
-        self.window.show()
+        self.window.show()'''
     def on_speak_clicked(self, widget=None, event=None):
         filepath = audio_file_path+'/'+self.tree_value+'.ogg'
         #print filepath
@@ -1742,7 +1750,6 @@ class wordzGui:
         wordz_db.add_to_db(word, group, detail)
         self.refresh_groups(group)
         self.treestore.clear()
-        self.new_word.append(word)
         #print self.new_word
         self.on_back_clicked()
 
@@ -1781,7 +1788,7 @@ class wordzGui:
             return
         self.treestore.clear()
         #self.search.set_text('')
-        self.new_word = []
+        #self.new_word = []
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
@@ -1792,6 +1799,8 @@ class wordzGui:
         for i in ls:
             if i[1] == u'0:0':
                 self.acc_dict[i[0]] = 0
+                if i[0] not in self.new_word:
+                    self.new_word.append(i[0])
             else:
                 try:
                     self.new_word.remove(i[0])
@@ -1816,6 +1825,7 @@ class wordzGui:
             else:
                 t = 0
             piter = self.treestore.append(None, [group, t])
+            #print self.new_word
             for word in wordz_db.list_words_per_group(group):
                 self.treestore.append(piter, [word, self.acc_dict[word]])
         self.treeview.expand_all()
