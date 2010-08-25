@@ -249,6 +249,8 @@ class games_GUI:
         
     def on_review_clicked(self, widget=None, event=None):
         self.review_window = gtk.Window()
+        self.review_window.set_title('Review')
+        self.review_window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
         self.review_window.set_default_size(500,450)
         list_tree = ['Q.No.','Question','Answer','Response', 'Result']
         list_store = gtk.ListStore(str,str,str,str,str)
