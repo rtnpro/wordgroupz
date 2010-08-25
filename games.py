@@ -111,6 +111,7 @@ class games_GUI:
         
     def set_up_mcq(self):
         #d = self.mcq_dict.keys()
+        all = self.mcq_dict.keys()
         d = self.sorted_accuracy_list[0:self.no_of_ques]
         random.shuffle(d)
         self.ques = {}
@@ -123,7 +124,7 @@ class games_GUI:
                 continue
             a = a[1:len(a)]
             opts.append(a)
-            for j in d:
+            for j in all:
                 if j not in opt_keys:
                     #print 'j:'
                     #print j

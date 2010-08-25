@@ -708,11 +708,12 @@ class wordzGui:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
-        ls = c.fetchall()
-        #print 'l', ls
+        self.ls = []
+        self.ls = c.fetchall()
+        #print 'l', self.ls
         c.close()
         self.acc_dict = {}
-        for i in ls:
+        for i in self.ls:
             if i[1] == u'0:0':
                 self.acc_dict[i[0]] = 0
             else:
@@ -763,7 +764,7 @@ class wordzGui:
         #self.tvcolumn.pack_start(self.cell1, True)
         self.tvcolumn1.add_attribute(self.cellpb, 'value', 1)
         self.cellpb.set_property('text', None)
-        self.tvcolumn1.set_cell_data_func(self.cellpb, self.custom_tree_col_view, ls)
+        self.tvcolumn1.set_cell_data_func(self.cellpb, self.custom_tree_col_view, None)
         
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
@@ -933,13 +934,14 @@ class wordzGui:
 
     def custom_tree_col_view(self, column, renderer, model, iter, data):
         word = model.get_value(iter, 0)
-        for i in data:
+        for i in self.ls:
             if i[0] == word and i[1] == '0:0' and word not in self.new_word:
+                #print i
                 self.new_word.append(word)
                 #print self.new_word
-            else:
+            elif i[0]==word and i[1]!='0:0':
                 try:
-                    self.new_word.remove(i[0])
+                    self.new_word.remove(word)
                 except:
                     pass
         #print self.new_word
@@ -960,18 +962,19 @@ class wordzGui:
         self.window.hide()
         game = games.mcq()
         self.treestore.clear()
+        self.new_word = []
         self.on_back_clicked()
         self.window.show()
         '''
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
-        ls = c.fetchall()
+        self.ls = c.fetchall()
         #print 'l', l
         c.close()
         self.new_word = []
         self.acc_dict = {}
-        for i in ls:
+        for i in self.ls:
             if i[1] == u'0:0':
                 self.acc_dict[i[0]] = 0
             else:
@@ -1738,6 +1741,7 @@ class wordzGui:
 
     def on_add_clicked(self, widget, data=None):
         word = self.get_word.get_text()
+        self.new_word = []
         if word not in self.new_word and word not in wordz_db.list_words():
             self.new_word.append(word)
 
@@ -1792,20 +1796,21 @@ class wordzGui:
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
-        ls = c.fetchall()
-        #print 'l', ls
+        self.ls = []
+        self.ls = c.fetchall()
+        #print 'l', self.ls
         c.close()
         self.acc_dict = {}
-        for i in ls:
+        for i in self.ls:
             if i[1] == u'0:0':
                 self.acc_dict[i[0]] = 0
-                if i[0] not in self.new_word:
-                    self.new_word.append(i[0])
+                #if i[0] not in self.new_word:
+                #    self.new_word.append(i[0])
             else:
-                try:
-                    self.new_word.remove(i[0])
-                except:
-                    pass
+                #try:
+                    #self.new_word.remove(i[0])
+                #except:
+                #    pass
                 t = i[1].split(':')
                 acc = float(t[0])/float(t[1])*100
                 acc = int(acc)
