@@ -13,6 +13,9 @@ class games_GUI:
         self.builder.connect_signals(self)
         self.window = self.builder.get_object('games')
         self.flash_data = db.get_details_for_flashcard()
+        for i in self.flash_data:
+            if i[1] == '':
+                self.flash_data.remove(i)
         self.flash_frame = self.builder.get_object('frame5')
         self.flash_label = self.builder.get_object('label24')
         self.eventbox4 = self.builder.get_object('eventbox4')
@@ -319,7 +322,7 @@ class games_GUI:
                 d[i[0]]=l
         return d
     def on_random_clicked(self, widget=None, event=None):
-        if self.current_index < len(self.flash_data)-2:
+        if self.current_index <= len(self.flash_data)-2:
             self.remaining = self.flash_data[self.current_index+1:len(self.flash_data)]
         else:
             self.remaining = []
@@ -328,10 +331,7 @@ class games_GUI:
             self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining
         else:
             self.remaining.sort()
-            try:
-                self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining.sort()
-            except:
-                pass
+            self.flash_data = self.flash_data[0:self.current_index+1]+self.remaining
             
     def on_opts_toggled(self, widget=None, event=None):
         j = 1
@@ -433,7 +433,10 @@ class games_GUI:
                 self.flash_label.set_text(self.flash_data[self.current_index][1])
                 self.flash_label.set_alignment(0.1, 0.1)
                 self.flash_label.set_max_width_chars(50)
-                self.flash_label.set_line_wrap()
+                try:
+                    self.flash_label.set_line_wrap()
+                except:
+                    pass
         elif self.current_index in range((self.total_count -2),self.total_count):
             self.current_index = self.current_index + 1
         if self.count == self.total_count:

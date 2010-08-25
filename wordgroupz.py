@@ -118,6 +118,7 @@ class wordGroupzSql:
         for i in ['grp', 'details', 'wordnet','webster', 'wiktionary']:
             if i not in group_cols:
                 c.execute("""alter table groups add column %s text"""%(i))
+                conn.commit()
                 for j in self.list_groups():
                     t = (j,)
                     c.execute("""update groups set wordnet="%s" where grp=?"""%(wordnet.get_definition(j)),t)
