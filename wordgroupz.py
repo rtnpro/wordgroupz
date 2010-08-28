@@ -45,48 +45,6 @@ def threaded(f):
         t.start()
     return wrapper
 
-class get_def_thread(threading.Thread):
-    stopthread = threading.Event()
-    def run(self):
-        #print 'searching webster'
-        word = win.tree_value
-        #dic = win.chose_dict.get_active_text()
-        #print dic
-        #if dic == 'webster':
-            #print wordz_db.check_ws(win.tree_value)
-        dic = 'webster'
-        if wordz_db.check_ws(win.tree_value):
-            defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
-        else:
-            d = online_dict()
-            defs = d.get_def(word)
-            wordz_db.save_webster(win.tree_value, defs)
-        defs = '\n' + "webster:\n" + defs + '\n'
-        """
-        elif dic == 'wordnet':
-            if wordz_db.check_wn(win.tree_value):
-                defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
-            else:
-                defs = wordnet.get_definition(word)
-            defs = '\n' + 'wordnet:\n' + defs + '\n'
-        elif dic == 'wiktionary':
-            #print  wordz_db.check_wik(win.tree_value)
-            if wordz_db.check_wik(win.tree_value):
-                defs = wordz_db.get_dict_data(dic, win.tree_value)[0].strip("'").strip('"')
-                defs = '\n' + 'wiktionary:\n'+defs + '\n'
-            else:
-                defs = ''
-        buff = win.output_txtview.get_buffer()
-        end = buff.get_iter_at_offset(-1)
-        buff.place_cursor(end)
-        buff.insert_interactive_at_cursor(defs, True)"""
-        label = win.builder.get_object('label13')
-        label.set_text(defs)
-    def stop(self):
-        self._stop.set()
-    def stopped(self):
-        return self._stop.isSet()
-
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
 audio_file_path = wordgroupz_dir + '/audio'
@@ -1562,8 +1520,11 @@ class wordzGui:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
 
         try:
-            if ws != u'' or ws !=None:
-            
+            if ws != u'' and ws !=None:
+                self.builder.get_object('label10').hide()
+                self.builder.get_object('label9').hide()
+                #self.builder.get_object('look_webster').set_sensitive(False)
+                self.builder.get_object('scrolledwindow7').show()
                 ws_table = gtk.Table(columns=2)
                 ws_table.show()
                 self.vbox13.pack_start(ws_table, False, padding = 5)
@@ -1586,30 +1547,9 @@ class wordzGui:
                         sub_vbox.show()
                         frame.show()
                         frame.add(sub_vbox)
-                        #label = gtk.Label(i)
-                        #label.set_alignment(0.05, 0.1)
-                        #label.show()
-                        #frame.add(label)
                         s = i.split('\n')
-                        #print s
+                        
                         for j in s:
-                            """
-                            if j.startswith('   {'):
-                                hbox = gtk.HBox()
-                                hbox.show()
-                                label = gtk.Label('   ')
-                                label.show()
-                                hbox.pack_start(label, False)
-                                event = gtk.EventBox()
-                                event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#5C97BF'))
-                                label = gtk.Label('')
-                                label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
-                                label.set_alignment(0, 0)
-                                label.set_selectable(True)
-                                label.show()
-                                event.add(label)
-                                event.show()
-                                vbox.pack_start(event, padding=5)"""
                             if j==u'' or j.find('            ')>=0:
                                 pass
                             elif not j.startswith(' ') and j.strip()!='':
@@ -1688,16 +1628,12 @@ class wordzGui:
                     #label = self.builder.get_object('label13')
                     #label.set_alignment(0.10, 0.10)
                     #label.set_text(ws)
-                else:
-                    self.builder.get_object('look_webster').set_sensitive(True)
-                    label = gtk.Label()
-                    label.show()
-                    try:
-                        label.set_alignment(0.10, 0.10)
-                    except:
-                        pass
-                    label.set_text('Webster definition not in database,\nPlease click on "Look up"')
-                    self.vbox13.pack_start(label, False)
+            else:
+                self.builder.get_object('look_webster').set_sensitive(True)
+                self.builder.get_object('label9').show()
+                self.builder.get_object('label10').hide()
+                self.builder.get_object('scrolledwindow7').hide()
+                    
         except:
             pass
     def on_delete_clicked(self, widget=None, event=None):
@@ -1898,31 +1834,30 @@ class wordzGui:
         buff.place_cursor(end)
         buff.insert_interactive_at_cursor(defs, True)"""
     def on_lookup_webster_clicked(self, widget=None, event=None):
+        self.builder.get_object('look_webster').set_sensitive(False)
+        self.builder.get_object('label9').hide()
+        self.builder.get_object('label10').show()
         threading.Thread(target=self._startthread).start()
 
     def _startthread(self):
-        #print 'searching webster'
-        self.builder.get_object('look_webster').set_sensitive(False)
-        label = self.builder.get_object('label13')
-        label.set_text('Searching...')
         word = self.tree_value
         dic = 'webster'
         if wordz_db.check_ws(win.tree_value):
             defs = wordz_db.get_dict_data(dic, win.tree_value)[0]
         else:
-            
             d = online_dict()
             defs = d.get_def(word)
             
             wordz_db.save_webster(win.tree_value, defs)
         defs = '\n' + "webster:\n" + defs + '\n'
         #print defs
-        label.set_text(defs.encode('utf-8'))
         self.builder.get_object('look_webster').set_sensitive(True)
+        self.show_details_tree()
 
     def on_show_stats_clicked(self, widget=None, event=None):
         pass
         '''
+        #code for generating accuracy bar chart
         conn = sqlite3.connect(db_file_path)
         c = conn.cursor()
         c.execute("""select word, accuracy from word_groups""")
@@ -1983,6 +1918,5 @@ if __name__ == "__main__":
     wordz_db.db_init()
     win = wordzGui()
     win.window.show()
-    th = get_def_thread()
     gtk.gdk.threads_init()
     gtk.main()
