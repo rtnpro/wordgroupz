@@ -33,7 +33,10 @@ class games_GUI:
         except:
             pass
         self.current_index = 0
-        self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
+        try:
+            self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
+        except:
+            pass
         self.check = self.builder.get_object('check')
         self.total_count = len(self.flash_data)
         self.count = 0
@@ -485,8 +488,12 @@ class games_GUI:
             self.dialog_proceed.set_sensitive(True)
             count = int(choice)
             self.entry1.set_editable(False)
+            self.entry1.set_sensitive(False)
             self.count_ = count
         else:
+            self.entry1.set_visible(True)
+            self.entry1.set_sensitive(True)
+            self.entry1.set_property('is-focus', True)
             if not self.entry1.get_text().isdigit():
                 self.dialog_proceed.set_sensitive(False)
             else:
@@ -540,7 +547,7 @@ class games_GUI:
             label = self.choice4.get_child()
             label.set_markup('<span foreground="white">Custom</span>')
 
-            self.entry1.set_visible(True)
+            self.entry1.set_visible(False)
             self.dialog.show()
         elif 20<=count<30:
             self.count_ = 10
@@ -559,7 +566,7 @@ class games_GUI:
             self.choice4.set_visible(True)
             label = self.choice4.get_child()
             label.set_markup('<span foreground="white">Custom</span>')
-            self.entry1.set_visible(True)
+            self.entry1.set_visible(False)
             self.dialog.show()
         else:
             self.count_ = 10
@@ -578,7 +585,7 @@ class games_GUI:
             self.choice4.set_visible(True)
             label = self.choice4.get_child()
             label.set_markup('<span foreground="white">Custom</span>')
-            self.entry1.set_visible(True)
+            self.entry1.set_visible(False)
             self.dialog.show()
         
             
@@ -586,20 +593,44 @@ def flash():
     global db
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
-    
-    g.builder.get_object('window2').show()
-    g.builder.get_object('window2').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
+    l = len(g.get_accuracy_table())
+    print l
+    if l ==0:
+        show_sorry_dialog()
+    else:
+        g.builder.get_object('window2').show()
+        g.builder.get_object('window2').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     #wordgroupz.win.window.hide()
     gtk.main()
+
+def show_sorry_dialog():
+    window = gtk.Window()
+    window.set_title('Oops!')
+    window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
+    window.set_default_size(300,200)
+    vbox = gtk.VBox()
+    window.add(vbox)
+    event = gtk.EventBox()
+    vbox.pack_start(event)
+    event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#444444"))
+    label = gtk.Label('Not enough data!')
+    event.add(label)
+    label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+    window.show_all()
+    window.connect('destroy', gtk.main_quit)
 
 def mcq():
     global db
     db = wordgroupz.wordGroupzSql()
     g = games_GUI()
-    g.show_question_num_dialog()
-    #g.set_up_mcq()
-    #g.builder.get_object('window3').show()
-    g.builder.get_object('window3').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
+    l = len(g.get_accuracy_table())
+    if l <4:
+        show_sorry_dialog()
+    else:
+        g.show_question_num_dialog()
+        #g.set_up_mcq()
+        #g.builder.get_object('window3').show()
+        g.builder.get_object('window3').set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
     gtk.main()
     
 if __name__ == '__main__':
