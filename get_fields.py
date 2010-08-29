@@ -11,6 +11,8 @@ class get_wiki_data:
     def __init__(self, filename):
         #self.f = open(filename, 'r')
         self.s = filename
+        #print self.s
+        self.s = self.s.split('   [1]:')[0]
         #self.s = self.f.read()
         self.sections = self.s.split('\n## ')
         self.pos = ['Noun', 'Verb', 'Pronoun', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Interjection', 'Antonyms', 'Synonyms', 'Derived terms', 'Etymology', 'Pronunciation']
@@ -19,34 +21,39 @@ class get_wiki_data:
         for i in self.sections:
             if i.split('\n')[0].endswith('Contents'):
                 self.contents = i
-        #print self.contents
 
     def get_eng_fields(self):
         self.fields = []
         self.subfields = []
-        l = self.contents.split('\n  *')
-        for i in l:
-            i = i.split('\n')
-            #print i[0]
-            #print i[0].find('English')
-            
-            if i[0].find('English') > 0:
-                for j in i:
-                    '''
-                    if j.startswith('    *'):
-                        j = j.strip('    * ')
-                        j = j[5: j.find(']')]
-                        self.fields.append([j])
-                    '''
-                    j = j.strip()
-                    j = j.lstrip('* [')
-                    j = j.split('][')[0]
-                    j = j.split(' ', 1)
-                    index = j[0].split('.')
-                    if index[0] == '1':
-                        self.fields.append(j)
-                        
-        #print self.fields
+        try:
+            l = self.contents.split('\n  *')
+            for i in l:
+                i = i.split('\n')
+                #print i[0]
+                #print i[0].find('English')
+
+                if i[0].find('English') > 0:
+                    for j in i:
+                        '''
+                        if j.startswith('    *'):
+                            j = j.strip('    * ')
+                            j = j[5: j.find(']')]
+                            self.fields.append([j])
+                        '''
+                        j = j.strip()
+                        j = j.lstrip('* [')
+                        j = j.split('][')[0]
+                        j = j.split(' ', 1)
+                        index = j[0].split('.')
+                        if index[0] == '1':
+                            self.fields.append(j)
+        except:
+            t = self.s.split('\n')
+            for i in t:
+                if i.startswith('### ') or i.startswith('## '):
+                    i = i.split(']] ')[1]
+                    print i
+                    self.fields.append(i)
 
     def cleanup(self):
         #for i in self.fields:
@@ -105,15 +112,12 @@ class get_wiki_data:
                     self.dict[title] = ['\n'.join(t[1:-1])]
                 else:
                     self.dict[title].append('\n'.join(t[1:-1]))
-                
         self.cleanup()
-        #self.show('Etymology')
-        #print self.dict.keys()
 
-    #def cleanup(self):
     def save_str(self):
+        l = len(self.fields)
         s = ''
-        for i in self.fields[1:-1]:
+        for i in self.fields[1:l]:
             if len(i[0]) == 3:
                 for key in self.dict.keys():
                     if i[1] == key:
@@ -128,6 +132,8 @@ class get_wiki_data:
                         self.dict[key][0] = '\n'.join(self.dict[key][0])
                         s = s + '\n' + self.dict[key][0] + '\n'
                     elif i[1].find(key)>=0:
+                        if i[1].find('edit')>=0:
+                            i[1] = i[1].split('edit] ')[1]
                         s = s + '#' + i[1]
                         #self.dict[key][0]
                         self.dict[key][0] = self.dict[key][0].split('\n')
@@ -173,7 +179,17 @@ class get_wiki_data:
                             self.dict[key][0] = '\n'.join(self.dict[key][0])
                             s = s + '\n' + self.dict[key][0] + '\n'
                             self.dict[key].remove(self.dict[key][0])
-                
+            elif i in self.dict.keys():
+                s = s + '#' + i
+                self.dict[i][0] = self.dict[i][0].split('\n')
+                for j in self.dict[i][0]:
+                    line = j
+                    line = line.replace('*', '')
+                    line = line.replace('_', '')
+                    line = line.strip()
+                    self.dict[i][0][self.dict[i][0].index(j)] = line
+                self.dict[i][0] = '\n'.join(self.dict[i][0])
+                s = s + '\n' + self.dict[i][0] + '\n'
         return s
 
 def main(html):

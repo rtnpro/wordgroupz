@@ -1054,15 +1054,10 @@ class wordzGui:
 
     def load_started(self, webview, frame):
         self.progress.set_visible(True)
-        #self.save_audio.set_sensitive(False)
         self.browser_load_status='started'
 
     def load_finished(self, webview, frame):
         self.progress.set_visible(False)  
-        #self.status_label.set_text('Content loaded.')
-        #self.status_label.hide()
-        #self.status_label.set_text('') 
-        
         self.browser_load_status = 'finished'
         if self.count == 0:
             self.count = 1
@@ -1107,24 +1102,10 @@ class wordzGui:
             i.extract()
         tmp =  str(soup)
         self.tmp = tmp
-        #self.status_label.set_text('Loading content...')
         self.browser.load_string(tmp, "text/html", "utf-8", self.url)
-        #self.browser.show()
         txt_html = html2text(tmp, self.url)
-        #file = open('tmp','w')
-        #file.write(txt_html)
-        #file.close()
-        #g = get_fields.get_wiki_data(txt_html)
-        #g.get_contents()
-        #g.get_eng_fields()
-        #g.get_field_details()
-        #file = open('data/'+self.tree_value+'.wiki', 'w')
-        #print g.dict.keys()
-        #print txt_html
         wiki_txt = get_fields.main(txt_html)
-        #print wiki_txt
         wordz_db.save_wiktionary(self.tree_value, wiki_txt)
-        #print wordz_db.get_dict_data('wiktionary', self.tree_value)
         self.show_details_tree() 
 
         
