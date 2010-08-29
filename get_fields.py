@@ -52,7 +52,6 @@ class get_wiki_data:
             for i in t:
                 if i.startswith('### ') or i.startswith('## '):
                     i = i.split(']] ')[1]
-                    print i
                     self.fields.append(i)
 
     def cleanup(self):
