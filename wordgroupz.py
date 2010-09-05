@@ -361,7 +361,7 @@ class online_dict:
         if welcome[0:4] != '220 ':
             raise Exception("server doesn't want you (%s)" % welcome[0:4])
         r, _ = self._cmd('CLIENT python client, versionless')
-        if r != '250':
+        if r != '2((40))':
             raise Exception('sending client string failed')
 
     def dial(self, dialstr):
@@ -478,8 +478,8 @@ class online_dict:
             raise Exception('response to match: %s' % line)
         lines = [tuple(self.split(l, ' ', 1)) for l in self._readlist()]
         line = self._read()
-        if line[0:4] != '250 ':
-            raise Exception('expected code 250 after match (%s)' % line)
+        if line[0:4] != '2((40)) ':
+            raise Exception('expected code 2((40)) after match (%s)' % line)
         return lines
     
     def get_def(self, word):
@@ -1150,7 +1150,7 @@ class wordzGui:
         #width, height = self.window.get_size()
         """
         if page_num==1:
-            #self.window.resize(max(width, 800), max(height, 550))
+            #self.window.resize(max(width, 800), max(height, 5((40))))
             #print self.tree_value, self.wiki_word, self.browser_load_status
             '''
             if self.tree_value == self.wiki_word and (self.browser_load_status is 'finished' or 'loading'):
@@ -1164,6 +1164,10 @@ class wordzGui:
         #self.show_details_tree()
         #self.show_details_tree()
         if page_num == 0:
+            self.show_details_tree()
+        elif page_num == 1:
+            self.show_details_tree()
+        elif page_num == 2:
             self.show_details_tree()
     def on_notebook2_switch_page(self, notebook, page, page_num):
         if page_num == 0:
@@ -1213,7 +1217,7 @@ class wordzGui:
                 w, h = self.window.get_size()
                 self.vpan.set_position(h)
                 tmp = self.vpan.get_position()
-                self.vpan.set_position(int((240.0/450)*h))
+                self.vpan.set_position(int((240.0/4((40)))*h))
             else:
                 self.vpan.set_position(10000)
                 self.hbox3.hide()'''
@@ -1271,7 +1275,6 @@ class wordzGui:
                         frame.set_shadow_type(gtk.SHADOW_OUT)
                         #frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
                         frame.show()
-                        
                         event_b.show()
                         #hbox_n.pack_start(frame, false)
                         #hbox_n.show_all()
@@ -1295,6 +1298,7 @@ class wordzGui:
                         #sub_sub_iter = self.details_treestore.append(sub_iter, [x.strip('\t')])
                         vbox1 = gtk.VBox()
                         label = gtk.Label()
+                        label.set_line_wrap(True)
                         l = len(x.strip('\t'))
                         label.set_markup('<b><big>'+x.strip('\t')[0:2]+'</big></b>'+x.strip('\t')[2:l])
                         #label.set_markup(x.strip('\t'))
@@ -1302,6 +1306,7 @@ class wordzGui:
                         #l = len(x.strip('\t'))
                         #print x.lstrip('\t')[0:l]
                         if self.window.get_size() == self.window.get_default_size():
+                            label.set_width_chars(40)
                             label.set_line_wrap(True)
                         label.set_selectable(True)
                         label.set_alignment(0.0, 0.5)
@@ -1315,6 +1320,8 @@ class wordzGui:
                         #self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
                         frame = gtk.Frame('Synonyms')
                         label = gtk.Label()
+                        label.set_width_chars(40)
+                        label.set_line_wrap(True)
                         label.set_markup(('<b><span foreground="white">'+ cgi.escape(x.strip('\tSynonyms:')) + '</span></b>'))
                         label.set_alignment(0.0, 0.5)
                         label.show()
@@ -1328,7 +1335,6 @@ class wordzGui:
                         frame.show()
                         hbox = gtk.HBox()
                         label = gtk.Label(' '*5)
-                        #label.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("blue"))
                         label.show()
                         hbox.pack_start(label, False)
                         hbox.pack_start(frame)
@@ -1336,12 +1342,8 @@ class wordzGui:
                         vbox1.pack_start(hbox, False)
         except:
             pass
-        
-        
         if wik != u'':
             t = wik.split('\n')
-            #print t[0:6]
-            #piter = self.details_treestore.append(None,['<span foreground="blue"><big><b>Wiktionary</b></big></span>'])
             table = gtk.Table(1, 2)
             table.set_col_spacing(0, 5)
             table.show()
@@ -1350,17 +1352,7 @@ class wordzGui:
             h1 = []
             j = 0
             for x in t:
-                #print 'j = ',
-                #print j
-                #j = j+1
                 if x.startswith('#'):
-                    #print sub_str
-                    #sub_iter = self.details_treestore.append(piter, ['<b>'+x.lstrip('#')+'</b>'])
-                    #h1.append(x.lstrip('#'))
-                    #print x.lstrip('#')
-                    #sub_str = ''
-                    #sub_sub_str = ''
-                    #sub_sub_str = ''
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
                     eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
@@ -1368,6 +1360,7 @@ class wordzGui:
                     main_label = gtk.Label()
                     main_label.set_markup('<b>'+x.lstrip('#')+'</b>')
                     main_label.set_alignment(0.1, 0)
+                    main_label.set_line_wrap(True)
                     main_label.show()
                     table.attach(main_label, 0, 1, i, i+1, xoptions=gtk.FILL)
                     main_frame = gtk.Frame()
@@ -1381,7 +1374,6 @@ class wordzGui:
                     label = gtk.Label(' ')
                     label.show()
                     label.set_alignment(0, 0.5)
-                    #label.set_line_wrap(True)
                     eventb.add(label)
                     sub_vbox.pack_start(eventb, False)
                     table.attach(main_frame, 1, 2, i, i+1)
@@ -1389,21 +1381,14 @@ class wordzGui:
                     table.set_col_spacing(0, 5)
                     i = i + 1
                 elif not x.startswith('\t') and not x.startswith('#') and not x.startswith('\t#'):
-                    #print 'hi'
-                    #self.details_treestore.append(sub_iter, [x])
                     s = label.get_text()
                     if x == u'':
                         label.set_text( s + '\n' + x)
                     else:
                         label.set_text(s + x)
-                    #print label.get_text()
-                    #label.show()
+                    label.set_width_chars(((40)))
+                    label.set_line_wrap(True)
                 elif x.startswith('\t#'):
-                    #print sub_str
-                    #sub_sub_iter = self.details_treestore.append(sub_iter, ['<b>'+x.lstrip('\t#')+'</b>'])
-                    #print x.lstrip('\t#')
-                    #sub_sub_str = ''
-                    #pass
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
                     eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
@@ -1418,11 +1403,12 @@ class wordzGui:
                     sub_sub_vbox.pack_start(sub_sub_label, False)
                     sub_sub_frame = gtk.Frame(' ')
                     
-                    label = sub_sub_frame.get_label_widget()
-                    label.set_markup('<b>'+x.lstrip('\t#')+'</b>')
+                    label_ = sub_sub_frame.get_label_widget()
+                    label_.set_markup('<b>'+x.lstrip('\t#')+'</b>')
+                    label_.set_alignment(0, 0.5)
                     try:
                         if sub_sub_frame.get_label_widget()!=NULL:
-                            sub_sub_frame.set_label_widget(label)
+                            sub_sub_frame.set_label_widget(label_)
                     except:
                         pass
                     sub_sub_frame.show()
@@ -1440,8 +1426,6 @@ class wordzGui:
                     sub_vbox.pack_start(hbox, False)
                     
                 elif x.startswith('\t') and not x.startswith('\t#') and not x.startswith('\t\t'):
-                    #self.details_treestore.append(sub_sub_iter, [x.lstrip('\t')])
-                    #sub_sub_str = sub_sub_str + x.lstrip('\t')
                     if sub_label.get_use_markup() == False:
                         sub_label.set_use_markup(True)
                     if x == '\t':
@@ -1455,11 +1439,10 @@ class wordzGui:
                                 sub_label.set_label(sub_label.get_label()+'<b>'+x[0:2]+'</b>'+x[2:len(x)])
                             else:
                                 sub_label.set_label(sub_label.get_label()+x)
-                    
+                    sub_label.set_width_chars(((40)))
+                    sub_label.set_line_wrap(True)
                     pass
                 elif x.startswith('\t\t#'):
-                    #print x.split('#')
-                    #sub_sub_sub_iter = self.details_treestore.append(sub_sub_iter, ['<b>'+x.lstrip('\t\t#')+'</b>'])
                     eventb = gtk.EventBox()
                     eventb.set_visible_window(True)
                     eventb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#AED6EF"))
@@ -1467,6 +1450,7 @@ class wordzGui:
                     sub_sub_sub_frame = gtk.Frame(' ')
                     label = sub_sub_sub_frame.get_label_widget()
                     label.set_markup('<b>'+x.lstrip('\t\t#')+'</b>')
+                    label.set_label = label.get_label().strip()
                     try:
                         if sub_sub_sub_frame.get_label_widget()!=NULL:
                             sub_sub_sub_frame.set_label_widget(label)
@@ -1482,23 +1466,15 @@ class wordzGui:
                     eventb.add(sub_sub_label)
                     sub_sub_label.show()
                     sub_sub_sub_sub_vbox.pack_start(eventb, False)
-                    #sub_sub_vbox.pack_start(sub_sub_sub_frame, False)
-                    
-                                        
+
                 elif x.startswith('\t\t') and not x.startswith('\t\t#'):
-                    
-                    #print x
-                    '''
-                    if x.strip('\t\t') != '':
-                        if x.find('terms derived from')>=0:
-                            self.details_treestore.append(sub_sub_sub_iter, ['<u><i>'+ x.lstrip('\t\t')+'</i></u>'])
-                        else:
-                            self.details_treestore.append(sub_sub_sub_iter, [x.lstrip('\t\t')])'''
                     if x.strip('\t\t') !='':
                         if x.find('terms derived from')>=0:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
                         else:
                             sub_sub_label.set_text( sub_sub_label.get_text()+'\n'+ x.lstrip('\t\t'))
+                        sub_sub_label.set_width_chars(((40)))
+                        sub_sub_label.set_line_wrap(True)
 
         try:
             if ws != u'' and ws !=None:
@@ -1545,6 +1521,7 @@ class wordzGui:
                                     label.set_markup('<b>'+type+'</b>')
                                 except:
                                     pass
+                                label.set_line_wrap(True)
                                 label.set_alignment(0, 0)
                                 label.show()
                                 ws_table.attach(label, 0, 1, k, k+1, xoptions = gtk.FILL)
@@ -1563,6 +1540,7 @@ class wordzGui:
                                 #event.show()
                                 label = gtk.Label('')
                                 label.set_alignment(0, 0)
+                                label.set_line_wrap(True)
                                 #label.set_selectable(True)
                                 label.show()
                                 #event.add(vbox)
@@ -1583,12 +1561,14 @@ class wordzGui:
                                         label = gtk.Label()
                                         label.show()
                                         label.set_alignment(0, 0)
+                                        label.set_line_wrap(True)
                                         #label.set_selectable(True)
                                         event = gtk.EventBox()
                                         event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
                                         event.show()
                                         label = gtk.Label('')
                                         label.set_alignment(0, 0)
+                                        label.set_line_wrap(True)
                                         #label.set_selectable(True)
                                         label.show()
                                         event.add(label)
@@ -1603,6 +1583,7 @@ class wordzGui:
                                     pass
                             if j!=u'':
                                 label.set_text(label.get_text()+'\n'+j)
+                                label.set_line_wrap(True)
                         #self.vbox13.pack_start(frame, padding=5)
                         self.vbox13.show_all()
                     self.builder.get_object('look_webster').set_sensitive(False)
@@ -1880,11 +1861,11 @@ class wordzGui:
                 ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, '%d'%int(height),
                         ha='center', va='bottom')
         canvas = FigureCanvasGTK(fig)
-        canvas.set_size_request(100*len(words),500)
+        canvas.set_size_request(100*len(words),((40))0)
         canvas.show()
         autolabel(rects1)
         graphwin = gtk.Window()
-        graphwin.set_default_size(600, 500)
+        graphwin.set_default_size(600, ((40))0)
         scroller = gtk.ScrolledWindow()
         scroller.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox = gtk.VBox()
