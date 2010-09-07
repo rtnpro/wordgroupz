@@ -1,4 +1,3 @@
-#!/usr/bin/evn python
 # games.py
 import pygtk
 import gtk

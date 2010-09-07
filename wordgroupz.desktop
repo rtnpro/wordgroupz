@@ -8,4 +8,4 @@ Icon=wordgroupz
 TryExec=wordgroupz
 Exec=wordgroupz
 Terminal=false
-Categories=Application;Education;
+Categories=Education;

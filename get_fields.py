@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 '''
 This python file will get the various fields from
 a text file of a wiki page that has been produced
