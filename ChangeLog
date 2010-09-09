@@ -1,3 +1,9 @@
+2010-09-04 rtnpro rtnpro@gmail.com
+	* Release version 0.3
+	* Added games, generate statistics on user's performance
+	* User espeak to spell words whose pronunciations are not available or not
+	downloaded from wiktionary
+
 2010-07-23 rtnpro rtnpro@gmail.com
     * Release version 0.3b
     * Added wiktionary support, download pronunciation files from wiktionary
