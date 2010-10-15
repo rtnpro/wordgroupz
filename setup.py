@@ -5,7 +5,7 @@ from distutils.core import setup
 
 doclines = __doc__.split("\n")
 setup(name='wordgroupz',
-      version='0.3',
+      version='0.3.1',
       description=doclines[0],
       long_description = "\n".join(doclines[:]),
       platforms = ["Linux"],
@@ -16,7 +16,7 @@ setup(name='wordgroupz',
       data_files=[('/usr/share/applications',['wordgroupz.desktop']),
           ('/usr/bin',['wordgroupz']),
           ('/usr/share/pixmaps',['icons/wordgroupz.png']),
-          ('/usr/share/wordgroupz',['wordgroupz.glade','wordgroupz.py','nltk_wordnet.py', 'games.py', 'games.glade', 'get_fields.py', 'html2text.py', 'wiktionary_header', 'espeak.py'])],
+          ('/usr/share/wordgroupz',['wordgroupz.glade','wordgroupz.py','wordnet.py', 'games.py', 'games.glade', 'get_fields.py', 'html2text.py', 'wiktionary_header', 'espeak.py', 'get_wordnet_def.py'])],
 
  #       cmdclass = { "build" : build_extra.build_extra,
  #                    "build_i18n" : build_i18n.build_i18n },

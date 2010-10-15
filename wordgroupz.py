@@ -21,7 +21,7 @@ import os
 import sys
 import socket
 import string
-import nltk_wordnet as wordnet
+import wordnet
 import webkit
 import urllib2
 from BeautifulSoup import BeautifulSoup
@@ -35,15 +35,6 @@ import thread
 import threading
 import games
 import espeak
-#import numpy as np
-#import matplotlib.pyplot as plt
-#from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar
-
-def threaded(f):
-    def wrapper(*args):
-        t = threading.Thread(target=f, args = args)
-        t.start()
-    return wrapper
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'

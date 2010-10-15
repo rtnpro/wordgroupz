@@ -1,3 +1,7 @@
+2010-10-15 rtnpro rtnpro@gmail.com
+	* Release version 0.3.1
+	* Removed dependency on python-nltk
+
 2010-09-04 rtnpro rtnpro@gmail.com
 	* Release version 0.3
 	* Added games, generate statistics on user's performance
@@ -5,11 +9,11 @@
 	downloaded from wiktionary
 
 2010-07-23 rtnpro rtnpro@gmail.com
-    * Release version 0.3b
-    * Added wiktionary support, download pronunciation files from wiktionary
-    if available
-    * Changed GUI, added online dict.org and offline wordnet
-    support for getting word definition
+	* Release version 0.3b
+	* Added wiktionary support, download pronunciation files from wiktionary
+	if available
+	* Changed GUI, added online dict.org and offline wordnet
+	support for getting word definition
 
 2010-06-24 rtnpro rtnpro@gmail.com
-    * Released version 0.2
+	* Released version 0.2

@@ -5,7 +5,6 @@ DEPENDENCIES:
 python DB-API 2.0 interface for SQLite 3.x
 python-sqlite2
 pygtk2
-python-nltk
 pywebkitgtk
 urllib2
 python-BeautifulSoup

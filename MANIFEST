@@ -1,4 +1,5 @@
-nltk_wordnet.py
+wordnet.py
+get_wordnet_def.py
 wordgroupz.py
 wordgroupz.glade
 games.glade
