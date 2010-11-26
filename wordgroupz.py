@@ -21,7 +21,7 @@ import os
 import sys
 import socket
 import string
-import wordnet
+import get_wordnet_def as wordnet
 import webkit
 import urllib2
 from BeautifulSoup import BeautifulSoup
