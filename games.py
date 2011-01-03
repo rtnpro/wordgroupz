@@ -4,6 +4,14 @@ import gtk
 import wordgroupz
 import random
 
+import locale
+import gettext
+APP = 'worgroupz'
+DIR = 'locale'
+locale.setlocale(locale.LC_ALL, '')
+gettext.bindtextdomain(APP, DIR)
+gettext.textdomain(APP)
+_ = gettext.gettext
 
 class games_GUI:
     def __init__(self):
@@ -24,7 +32,7 @@ class games_GUI:
         self.eventbox10 = self.builder.get_object('eventbox10')
         self.eventbox10.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
         label=self.flash_frame.get_label_widget()
-        label.set_text('word')
+        label.set_text(_('word'))
         label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
         try:
             if self.flash_frame.get_label_widget()!=NULL:
@@ -85,10 +93,10 @@ class games_GUI:
         self.game_mode = self.builder.get_object('game_mode')
         self.game_mode_sub = gtk.Menu()
         self.game_mode_sub.show()
-        self.by_word = gtk.RadioMenuItem(None, 'word')
+        self.by_word = gtk.RadioMenuItem(None, _('word'))
         self.by_word.set_active(True)
         self.by_word.show()
-        self.by_def = gtk.RadioMenuItem(self.by_word, 'definition')
+        self.by_def = gtk.RadioMenuItem(self.by_word, _('definition'))
         self.by_def.connect('toggled', self.on_radio_toggled)
         self.by_word.connect('toggled', self.on_radio_toggled)
         #self.by_word.set_active(True)
@@ -251,10 +259,10 @@ class games_GUI:
         
     def on_review_clicked(self, widget=None, event=None):
         self.review_window = gtk.Window()
-        self.review_window.set_title('Review')
+        self.review_window.set_title(_('Review'))
         self.review_window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
         self.review_window.set_default_size(500,450)
-        list_tree = ['Q.No.','Question','Answer','Response', 'Result']
+        list_tree = [_('Q.No.'),_('Question'),_('Answer'),_('Response'), _('Result')]
         list_store = gtk.ListStore(str,str,str,str,str)
         for row in self.review_data:
             #print len(row)
@@ -361,7 +369,7 @@ class games_GUI:
         if self.mode == 'definition':
             #print self.mode
             label=self.flash_frame.get_label_widget()
-            label.set_text('definition')
+            label.set_text(_('definition'))
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
             try:
                 if self.flash_frame.get_label_widget()!=NULL:
@@ -372,7 +380,7 @@ class games_GUI:
             self.flash_label.set_alignment(0.1, 0.1)
         elif self.mode == 'word':
             label=self.flash_frame.get_label_widget()
-            label.set_text('word')
+            label.set_text(_('word'))
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
             try:
                 if self.flash_frame.get_label_widget()!=NULL:
@@ -399,7 +407,7 @@ class games_GUI:
 
         else:
             label=self.flash_frame.get_label_widget()
-            label.set_text('word')
+            label.set_text(_('word'))
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
             try:
                 if self.flash_frame.get_label.widget()!=NULL:
@@ -415,7 +423,7 @@ class games_GUI:
             self.current_index = self.current_index + 1
             if self.mode == 'word':
                 label = self.flash_frame.get_label_widget()
-                label.set_text('word')
+                label.set_text(_('word'))
                 label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
                 try:
                     if self.flash_frame.get_label_widget()!=NULL:
@@ -426,7 +434,7 @@ class games_GUI:
                 self.flash_label.set_markup('<big><big><b>'+self.flash_data[self.current_index][0]+'</b></big></big>')
             elif self.mode == 'definition':
                 label = self.flash_frame.get_label_widget()
-                label.set_text('definition')
+                label.set_text(_('definition'))
                 label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
                 try:
                     if self.flash_frame.get_label_widget()!=NULL:

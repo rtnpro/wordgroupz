@@ -35,6 +35,16 @@ import thread
 import threading
 import games
 import espeak
+#from gettext import gettext as _
+import locale
+import gettext
+APP = 'worgroupz'
+DIR = 'locale'
+locale.setlocale(locale.LC_ALL, '')
+gettext.bindtextdomain(APP, DIR)
+gettext.textdomain(APP)
+_ = gettext.gettext
+
 
 usr_home = os.environ['HOME']
 wordgroupz_dir = usr_home+'/.wordgroupz'
@@ -632,7 +642,7 @@ class wordzGui:
         self.builder.add_from_file("wordgroupz.glade")
         self.window = self.builder.get_object("MainWindow")
         self.window.set_icon_from_file("/usr/share/pixmaps/wordgroupz.png")
-        self.window.set_title("wordGroupz")
+        self.window.set_title(_("wordGroupz"))
         self.builder.connect_signals(self)
         self.get_word = self.builder.get_object("get_word")
         self.get_group = gtk.combo_box_entry_new_text()
@@ -700,8 +710,8 @@ class wordzGui:
                     self.treestore.append(piter, [word,'n/a'])"""
 
         self.treeview = gtk.TreeView()
-        self.tvcolumn = gtk.TreeViewColumn('Word Groups')
-        self.tvcolumn1 = gtk.TreeViewColumn('Accuracy')
+        self.tvcolumn = gtk.TreeViewColumn(_('Word Groups'))
+        self.tvcolumn1 = gtk.TreeViewColumn(_('Accuracy'))
         self.treeview.append_column(self.tvcolumn)
         self.treeview.append_column(self.tvcolumn1)
         #self.treeview.append_column(self.tvcolumn1)
@@ -863,7 +873,7 @@ class wordzGui:
         
         
         self.details_cell = gtk.CellRendererText()
-        self.details_tvcolumn = gtk.TreeViewColumn('Details',self.details_cell,markup=0)
+        self.details_tvcolumn = gtk.TreeViewColumn(_('Details'),self.details_cell,markup=0)
         self.details_treeview.append_column(self.details_tvcolumn)
         #self.details_tvcolumn.pack_start(self.details_cell, True)
         self.details_tvcolumn.add_attribute(self.details_cell, 'text', 0)
@@ -1309,7 +1319,7 @@ class wordzGui:
                         
                     elif x.startswith('\tSynonyms:'):
                         #self.details_treestore.append(sub_sub_iter, [x.strip('\t').replace('Synonyms', '<span foreground="blue">Synonyms</span>')])
-                        frame = gtk.Frame('Synonyms')
+                        frame = gtk.Frame(_('Synonyms'))
                         label = gtk.Label()
                         label.set_width_chars(40)
                         label.set_line_wrap(True)
@@ -1663,11 +1673,11 @@ class wordzGui:
 
     def on_about_clicked(self, widget, data=None):
         dialog = gtk.AboutDialog()
-        dialog.set_name('wordz')
+        dialog.set_name(_('wordz'))
         dialog.set_copyright('(c) 2010 Ratnadeep Debnath')
         dialog.set_website('http://gitorious.org/wordGroupz/wordgroupz')
         dialog.set_authors(['Ratnadeep Debnath <rtnpro@gmail.com>'])
-        dialog.set_program_name('wordGroupz')
+        dialog.set_program_name(_('wordGroupz'))
         dialog.run()
         dialog.destroy()
 

@@ -1,0 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-01-03 12:19+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: games.glade.h:1
+msgid " "
+msgstr ""
+
+#: games.glade.h:2
+msgid "Check"
+msgstr ""
+
+#: games.glade.h:3
+msgid "Choose"
+msgstr ""
+
+#: games.glade.h:4
+msgid "Dammit!"
+msgstr ""
+
+#: games.glade.h:5
+msgid "I knew it"
+msgstr ""
+
+#: games.glade.h:6
+msgid "OVER!!!"
+msgstr ""
+
+#: games.glade.h:7
+msgid "Options"
+msgstr ""
+
+#: games.glade.h:8
+msgid "Proceed"
+msgstr ""
+
+#: games.glade.h:9 games.py:262
+msgid "Review"
+msgstr ""
+
+#: games.glade.h:10
+msgid "Select number of questions to attempt..."
+msgstr ""
+
+#: games.glade.h:11
+msgid "What does this mean?"
+msgstr ""
+
+#: games.glade.h:12
+msgid "_Game Modes"
+msgstr ""
+
+#: games.glade.h:13
+msgid "frame2"
+msgstr ""
+
+#: games.glade.h:14
+msgid "wordGroupz - Flash Card"
+msgstr ""
+
+#: games.glade.h:15
+msgid "wordGroupz - MCQ"
+msgstr ""
+
+#: wordgroupz.glade.h:1
+msgid "Add word"
+msgstr ""
+
+#: wordgroupz.glade.h:2
+msgid "Enter notes"
+msgstr ""
+
+#: wordgroupz.glade.h:3
+msgid "Go back to initial view"
+msgstr ""
+
+#: wordgroupz.glade.h:4
+msgid "Group"
+msgstr ""
+
+#: wordgroupz.glade.h:5
+msgid "Look up"
+msgstr ""
+
+#: wordgroupz.glade.h:6
+msgid "Notes"
+msgstr ""
+
+#: wordgroupz.glade.h:7
+msgid "Searching..."
+msgstr ""
+
+#: wordgroupz.glade.h:8
+msgid "Statistics"
+msgstr ""
+
+#: wordgroupz.glade.h:9
+msgid "Webster"
+msgstr ""
+
+#: wordgroupz.glade.h:10
+msgid ""
+"Webster definition not in database,\n"
+"Please click of 'Look up' to search"
+msgstr ""
+
+#: wordgroupz.glade.h:12
+msgid "Wiktionary"
+msgstr ""
+
+#: wordgroupz.glade.h:13
+msgid "Word"
+msgstr ""
+
+#: wordgroupz.glade.h:14
+msgid "Wordnet"
+msgstr ""
+
+#: wordgroupz.glade.h:15
+msgid "_File"
+msgstr ""
+
+#: wordgroupz.glade.h:16
+msgid "_Help"
+msgstr ""
+
+#: games.py:35 games.py:96 games.py:383 games.py:410 games.py:426
+msgid "word"
+msgstr ""
+
+#: games.py:99 games.py:372 games.py:437
+msgid "definition"
+msgstr ""
+
+#: games.py:265
+msgid "Q.No."
+msgstr ""
+
+#: games.py:265
+msgid "Question"
+msgstr ""
+
+#: games.py:265
+msgid "Answer"
+msgstr ""
+
+#: games.py:265
+msgid "Response"
+msgstr ""
+
+#: games.py:265
+msgid "Result"
+msgstr ""
+
+#: wordgroupz.py:645 wordgroupz.py:1680
+msgid "wordGroupz"
+msgstr ""
+
+#: wordgroupz.py:713
+msgid "Word Groups"
+msgstr ""
+
+#: wordgroupz.py:714
+msgid "Accuracy"
+msgstr ""
+
+#: wordgroupz.py:876
+msgid "Details"
+msgstr ""
+
+#: wordgroupz.py:1322
+msgid "Synonyms"
+msgstr ""
+
+#: wordgroupz.py:1676
+msgid "wordz"
+msgstr ""
