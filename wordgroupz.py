@@ -649,17 +649,38 @@ class wordzGui:
         self.get_group.set_tooltip_text("Enter a group for your word")
         self.details = self.builder.get_object("textview1")
         self.eventbox1 = self.builder.get_object('eventbox1')
+        
+        self.eventbox2 = self.builder.get_object('eventbox2')
+        self.eventbox2.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
+        self.eventbox1.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
+        self.get_group_new = gtk.combo_box_entry_new_text()
+        self.get_group_new.set_tooltip_text("Enter a group for your word")
+        
         self.eventbox1.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
         self.get_group.child.connect('key-press-event',self.item_list_changed)
         self.frame2 = self.builder.get_object('frame2')
         self.frame2.hide()
+        
+        self.preview_button = self.builder.get_object("preview_button")
+        self.preview_entry = self.builder.get_object("preview_entry")
+        self.preview_button.connect("clicked",self.on_preview_button_clicked)
+        #self.preview_word = self.preview_entry.get_text()
+        
+        
         #self.vpan = self.builder.get_object("vpaned1")
         self.output_txtview = self.builder.get_object("textview2")
         for x in wordz_db.list_groups():
             self.get_group.append_text(x)
+            self.get_group_new.append_text(x)
+            
         self.table1 = self.builder.get_object("table1")
+        self.table2 = self.builder.get_object("table2")
+        
         self.get_group.show()
+        self.get_group_new.show()
+        
         self.table1.attach(self.get_group, 1,2,1,2)
+        self.table2.attach(self.get_group_new,0,1,0,1)
 
         self.hbox5 = self.builder.get_object("hbox5")
         self.hbox5.hide()
@@ -797,8 +818,10 @@ class wordzGui:
         self.vbox7 = self.builder.get_object('vbox7')
         self.hbox2 = self.builder.get_object('hbox2')
         self.welcome = self.builder.get_object('frame3')
+        self.frame4 = self.builder.get_object('frame4')
         
         self.frame2.hide()
+        self.frame4.hide()
         #self.hbox2.pack_start(self.welcome)
         self.welcome.show()
         self.note = self.builder.get_object('label16')
@@ -910,14 +933,47 @@ class wordzGui:
         else:
             renderer.set_property('text', None)
 
-
+    
+    def on_preview_button_clicked(self, widget=None, event=None):
+	self.get_word = self.preview_entry.get_text()
+	self.show_meaning()
+      
+    def show_meaning(self,widget=None, event=None):
+	self.frame2.hide()
+	self.welcome.hide()
+        #self.frame4.show()
+	preview_label = self.builder.get_object('preview_label')
+	preview_event = self.builder.get_object('eventbox3')
+	temp = wordnet.get_definition(self.get_word)
+	preview_event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
+	preview_label.set_line_wrap(True)
+	preview_label.set_text(temp)
+	self.frame4.show()
+	
     def on_flash_card_clicked(self, widget=None, event=None):
         self.window.hide()
         game = games.flash()
         #game.g.builder.get_object('window2').show()
         self.window.show()
         
+    def on_preview_add_clicked(self, widget, data=None):
+	word = self.preview_entry.get_text()
+        self.new_word = []
+        if word not in self.new_word and word not in wordz_db.list_words():
+            self.new_word.append(word)
 
+        get_group_ch = self.get_group_new.child
+        group = get_group_ch.get_text()
+        conts = self.details.get_buffer()
+        start = conts.get_iter_at_offset(0)
+        end = conts.get_iter_at_offset(-1)
+        detail = conts.get_text(start, end)
+        wordz_db.add_to_db(word, group, detail)
+        self.refresh_groups(group)
+        self.treestore.clear()
+        #print self.new_word
+        self.on_back_clicked()
+        
     def on_mcq_clicked(self, widget=None, event=None):
         self.window.hide()
         game = games.mcq()
@@ -1203,6 +1259,8 @@ class wordzGui:
             self.play_b.set_sensitive(True)
             if self.welcome is self.hbox2.get_children()[1]:
                 self.welcome.hide()
+                self.frame4.hide()
+                
             #    self.hbox2.remove(self.welcome)
             #    self.hbox2.pack_start(self.builder.get_object('frame2'))
             self.tree_value = self.model.get_value(self.iter,0)
@@ -1237,6 +1295,8 @@ class wordzGui:
         wn = ''
         wik = ''
         ws = ''
+        self.welcome.hide()
+        self.frame4.hide()
         for i in self.vbox12.get_children():
             self.vbox12.remove(i)
         for i in self.vbox8.get_children():
@@ -1275,6 +1335,7 @@ class wordzGui:
                         frame = gtk.Frame()
                         frame.set_shadow_type(gtk.SHADOW_OUT)
                         #frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("grey"))
+                        
                         frame.show()
                         event_b.show()
                         #hbox_n.pack_start(frame, false)
@@ -1613,6 +1674,7 @@ class wordzGui:
         group = get_group_ch.get_text()
         self.refresh_groups(group, 1)
         self.frame2.hide()
+        #self.frame4.hide()
         self.welcome.show()
         self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
         #self.hbox2.pack_start(self.welcome)
@@ -1640,7 +1702,7 @@ class wordzGui:
         gtk.main_quit()
 
     def on_add_clicked(self, widget, data=None):
-        word = self.get_word.get_text()
+	word = self.get_word.get_text()
         self.new_word = []
         if word not in self.new_word and word not in wordz_db.list_words():
             self.new_word.append(word)
@@ -1685,8 +1747,10 @@ class wordzGui:
     def on_back_clicked(self, widget=None, data=None):
         if self.search.get_text()!= '':
             self.frame2.hide()
+            self.frame4.hide() 
             self.search.set_text('')
             self.welcome.show()
+            self.frame4.hide() 
             self.note.set_alignment(0.5, 0.1)
             self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
             return
@@ -1741,6 +1805,7 @@ class wordzGui:
         #self.show_details_tree()
         #self.selected_word.hide()
         self.frame2.hide()
+        self.frame4.hide()
         self.welcome.show()
         self.note.set_alignment(0.5, 0.1)
         self.note.set_markup('<span foreground="white"><b>Nothing selected</b></span>')
