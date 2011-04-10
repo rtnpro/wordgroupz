@@ -937,17 +937,45 @@ class wordzGui:
     
     def on_preview_button_clicked(self, widget=None, event=None):
 	self.get_word = self.preview_entry.get_text()
+	#self.clear_preview_word()
 	self.show_meaning()
-      
+	
+    #def clear_preview_word(self, widget=None, event=None):
+	#label = gtk.Label()
+	#print 'test'
+	##label.set_text(' ')
+	#table = self.builder.get_object('table3')
+	#table.attach(label,0,1,0,1)
+	#txt = ' '
+	#label.set_markup('<span foreground="white"><b>%s</b></span>'%txt)
+	#label.show()
+	
     def show_meaning(self,widget=None, event=None):
 	self.frame2.hide()
 	self.welcome.hide()
         #self.frame4.show()
-	preview_label = self.builder.get_object('preview_label')
+        table = self.builder.get_object('table3')
+        #preview_view_word = gtk.Label()
+        
+        preview_view_word = self.builder.get_object('label13')
+        #event = gtk.EventBox()
+        #preview_view_word.set_has_tooltip(True)
+        preview_view_word.set_text(self.get_word)
+        #table.attach(preview_view_word,0,1,0,1)
+        #preview_view_word.set_markup('<span foreground="white"><b>%s</b></span>'%self.get_word)
+	#event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
+        preview_view_word.show()
+        #preview_view_word.set_text(' ')
+        #event.show()
+        
+        scrolledwindow5 = self.builder.get_object('scrolledwindow5')
+        preview_label = self.builder.get_object('preview_label')
 	preview_event = self.builder.get_object('eventbox3')
 	temp = wordnet.get_definition(self.get_word)
+	#scrolledwindow5.add(preview_event)
 	preview_event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
 	preview_label.set_line_wrap(True)
+	preview_label.set_selectable(True)
 	preview_label.set_text(temp)
 	self.frame4.show()
 	
