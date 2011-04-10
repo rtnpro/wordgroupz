@@ -40,6 +40,7 @@ import locale
 import gettext
 APP = 'worgroupz'
 DIR = 'locale'
+VERSION = '0.3.1'
 locale.setlocale(locale.LC_ALL, '')
 gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
@@ -1739,7 +1740,7 @@ class wordzGui:
         dialog.set_copyright('(c) 2010 Ratnadeep Debnath')
         dialog.set_website('http://gitorious.org/wordGroupz/wordgroupz')
         dialog.set_authors(['Ratnadeep Debnath <rtnpro@gmail.com>'])
-        dialog.set_program_name(_('wordGroupz'))
+        dialog.set_program_name(_('wordGroupz '+ VERSION))
         dialog.run()
         dialog.destroy()
 
