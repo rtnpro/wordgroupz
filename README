@@ -1,4 +1,6 @@
-#INTRODUCTION
+===================
+What is wordGroupz?
+===================
 
 wordGroupz is a vocabulary building application which helps you to
 store any word you come across classified into different groups. It
@@ -15,7 +17,8 @@ This project is hosted at http://gitorious.org/wordgroupz/ and its wiki is
 located at http://gitorious.org/wordgroupz/pages/Home
 
 
-#USAGE
+USAGE
+-----
 
 When you first open wordGroupz (Applications->Education->wordgroupz), you
 see a welcome screen, with the stored wordlist on the left hand side, and
@@ -65,22 +68,24 @@ for a word beside it in the words tree view. Based on this report, you will
 be able to focus on the words where your accuracy is less.
 
 
-#INSTALL
+INSTALL
+-------
 As root, do 'python setup.py install'
 
 
-#DEPENDENCIES
-python DB-API 2.0 interface for SQLite 3.x
-python-sqlite2
-pygtk2
-pywebkitgtk
-urllib2
-python-BeautifulSoup
-gstreamer-python
-espeak
+DEPENDENCIES
+------------
+    - python DB-API 2.0 interface for SQLite 3.x
+    - python-sqlite2
+    - pygtk2
+    - pywebkitgtk
+    - urllib2
+    - python-BeautifulSoup
+    - gstreamer-python
+    - espeak
 
 
-#CREDITS
+CREDITS:
 The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205
 It has been designed by mazeo.
 
