@@ -8,10 +8,10 @@ also features offline wordnet dictionary support and online wiktionary
 and webster dictionary support. You can research about a word with the
 help of the wiktionary browser, and write down your own notes for a word
 if required. It also has pronunciation support for words downloaded from
- wiktionary.
+wiktionary.
 
 It is a free software licensed under the GNU General Public License version
- 2 and is written in pygtk/Python.
+2 and is written in pygtk/Python.
 
 This project is hosted at http://gitorious.org/wordgroupz/ and its wiki is
 located at http://gitorious.org/wordgroupz/pages/Home
@@ -75,17 +75,18 @@ As root, do 'python setup.py install'
 
 DEPENDENCIES
 ------------
-    - python DB-API 2.0 interface for SQLite 3.x
-    - python-sqlite2
-    - pygtk2
-    - pywebkitgtk
-    - urllib2
-    - python-BeautifulSoup
-    - gstreamer-python
-    - espeak
+- python DB-API 2.0 interface for SQLite 3.x
+- python-sqlite2
+- pygtk2
+- pywebkitgtk
+- urllib2
+- python-BeautifulSoup
+- gstreamer-python
+- espeak
 
 
-CREDITS:
+CREDITS
+-------
 The wordGroupz icon has been taken from http://www.openclipart.org/detail/60205
 It has been designed by mazeo.
 
