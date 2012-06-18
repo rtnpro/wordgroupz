@@ -651,8 +651,8 @@ class wordzGui:
         self.details = self.builder.get_object("textview1")
         self.eventbox1 = self.builder.get_object('eventbox1')
         
-        self.eventbox2 = self.builder.get_object('eventbox2')
-        self.eventbox2.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
+        #self.eventbox2 = self.builder.get_object('eventbox2')
+        #self.eventbox2.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#444444'))
         self.eventbox1.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
         self.get_group_new = gtk.combo_box_entry_new_text()
         self.get_group_new.set_tooltip_text("Enter a group for your word")
@@ -663,7 +663,7 @@ class wordzGui:
         self.frame2.hide()
         
         self.preview_button = self.builder.get_object("preview_button")
-        self.preview_entry = self.builder.get_object("preview_entry")
+        #self.preview_entry = self.builder.get_object("preview_entry")
         self.preview_button.connect("clicked",self.on_preview_button_clicked)
         #self.preview_word = self.preview_entry.get_text()
         
@@ -672,16 +672,16 @@ class wordzGui:
         self.output_txtview = self.builder.get_object("textview2")
         for x in wordz_db.list_groups():
             self.get_group.append_text(x)
-            self.get_group_new.append_text(x)
+            #self.get_group_new.append_text(x)
             
         self.table1 = self.builder.get_object("table1")
-        self.table2 = self.builder.get_object("table2")
+        #self.table2 = self.builder.get_object("table2")
         
         self.get_group.show()
-        self.get_group_new.show()
+        #self.get_group_new.show()
         
         self.table1.attach(self.get_group, 1,2,1,2)
-        self.table2.attach(self.get_group_new,0,1,0,1)
+        #self.table2.attach(self.get_group_new,0,1,0,1)
 
         self.hbox5 = self.builder.get_object("hbox5")
         self.hbox5.hide()
@@ -936,7 +936,7 @@ class wordzGui:
 
     
     def on_preview_button_clicked(self, widget=None, event=None):
-	self.get_word = self.preview_entry.get_text()
+	self.show_word = self.get_word.get_text()
 	#self.clear_preview_word()
 	self.show_meaning()
 	
@@ -960,7 +960,7 @@ class wordzGui:
         preview_view_word = self.builder.get_object('label13')
         #event = gtk.EventBox()
         #preview_view_word.set_has_tooltip(True)
-        preview_view_word.set_text(self.get_word)
+        preview_view_word.set_text(self.show_word)
         #table.attach(preview_view_word,0,1,0,1)
         #preview_view_word.set_markup('<span foreground="white"><b>%s</b></span>'%self.get_word)
 	#event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
@@ -971,7 +971,7 @@ class wordzGui:
         scrolledwindow5 = self.builder.get_object('scrolledwindow5')
         preview_label = self.builder.get_object('preview_label')
 	preview_event = self.builder.get_object('eventbox3')
-	temp = wordnet.get_definition(self.get_word)
+	temp = wordnet.get_definition(self.show_word)
 	#scrolledwindow5.add(preview_event)
 	preview_event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
 	preview_label.set_line_wrap(True)
