@@ -936,7 +936,7 @@ class wordzGui:
 
     
     def on_preview_button_clicked(self, widget=None, event=None):
-	self.get_word = self.get_word.get_text()
+	self.show_word = self.get_word.get_text()
 	#self.clear_preview_word()
 	self.show_meaning()
 	
@@ -960,7 +960,7 @@ class wordzGui:
         preview_view_word = self.builder.get_object('label13')
         #event = gtk.EventBox()
         #preview_view_word.set_has_tooltip(True)
-        preview_view_word.set_text(self.get_word)
+        preview_view_word.set_text(self.show_word)
         #table.attach(preview_view_word,0,1,0,1)
         #preview_view_word.set_markup('<span foreground="white"><b>%s</b></span>'%self.get_word)
 	#event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
@@ -971,7 +971,7 @@ class wordzGui:
         scrolledwindow5 = self.builder.get_object('scrolledwindow5')
         preview_label = self.builder.get_object('preview_label')
 	preview_event = self.builder.get_object('eventbox3')
-	temp = wordnet.get_definition(self.get_word)
+	temp = wordnet.get_definition(self.show_word)
 	#scrolledwindow5.add(preview_event)
 	preview_event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse('#AED6EF'))
 	preview_label.set_line_wrap(True)
